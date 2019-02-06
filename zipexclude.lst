@@ -1,0 +1,8 @@
+*.git*
+*~
+.dockerignore
+LICENSE
+README.md
+build.sh
+build/*
+zipexclude.lst
