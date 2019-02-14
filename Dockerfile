@@ -34,9 +34,7 @@ RUN apt-get update && \
     zip && \
     apt-get clean all -y
 
-RUN mkdir /builds \
-    /builds/tooltool_cache \
-    /builds/tooltool-manifests && \
+RUN mkdir /builds && \
     useradd -d /builds/worker -s /bin/bash -m worker
 
 # https://docs.docker.com/samples/library/ubuntu/#locales
@@ -80,7 +78,6 @@ COPY .bashrc /builds/worker/.bashrc
 COPY version /builds/worker/version
 COPY taskcluster /builds/taskcluster
 COPY licenses /builds/worker/android-sdk-linux/licenses
-COPY tooltool-manifests /builds/tooltool-manifests
 
 # Add entrypoint script
 COPY scripts/entrypoint.py /usr/local/bin/entrypoint.py
@@ -108,23 +105,6 @@ RUN cd /tmp && \
     unzip -qq -n /builds/worker/Downloads/sdk-tools-linux-4333796.zip -d /builds/worker/android-sdk-linux/ || true && \
     /builds/worker/android-sdk-linux/tools/bin/sdkmanager platform-tools "build-tools;28.0.3" && \
     pip install mozdevice==2.0.1 && \
-    cd /builds/tooltool_cache && \
-    tooltool.py --manifest /builds/tooltool-manifests/hostutils.manifest.current --cache-folder /builds/tooltool_cache --url https://tooltool.mozilla-releng.net/ fetch && \
-    tooltool.py --manifest /builds/tooltool-manifests/hostutils.manifest.previous --cache-folder /builds/tooltool_cache --url https://tooltool.mozilla-releng.net/ fetch && \
-    tooltool.py --manifest /builds/tooltool-manifests/releng.manifest.current --cache-folder /builds/tooltool_cache --url https://tooltool.mozilla-releng.net/ fetch && \
-    tooltool.py --manifest /builds/tooltool-manifests/releng.manifest.previous --cache-folder /builds/tooltool_cache --url https://tooltool.mozilla-releng.net/ fetch && \
-    tooltool.py --manifest /builds/tooltool-manifests/mitmproxy-recordings-raptor-tp6m-amazon.manifest.current --cache-folder /builds/tooltool_cache --url https://tooltool.mozilla-releng.net/ fetch && \
-    tooltool.py --manifest /builds/tooltool-manifests/mitmproxy-recordings-raptor-tp6m-amazon.manifest.previous --cache-folder /builds/tooltool_cache --url https://tooltool.mozilla-releng.net/ fetch && \
-    tooltool.py --manifest /builds/tooltool-manifests/mitmproxy-recordings-raptor-tp6m-facebook.manifest.current --cache-folder /builds/tooltool_cache --url https://tooltool.mozilla-releng.net/ fetch && \
-    tooltool.py --manifest /builds/tooltool-manifests/mitmproxy-recordings-raptor-tp6m-facebook.manifest.previous --cache-folder /builds/tooltool_cache --url https://tooltool.mozilla-releng.net/ fetch && \
-    tooltool.py --manifest /builds/tooltool-manifests/mitmproxy-recordings-raptor-tp6m-google.manifest.current --cache-folder /builds/tooltool_cache --url https://tooltool.mozilla-releng.net/ fetch && \
-    tooltool.py --manifest /builds/tooltool-manifests/mitmproxy-recordings-raptor-tp6m-google.manifest.previous --cache-folder /builds/tooltool_cache --url https://tooltool.mozilla-releng.net/ fetch && \
-    tooltool.py --manifest /builds/tooltool-manifests/mitmproxy-recordings-raptor-tp6m-youtube.manifest.current --cache-folder /builds/tooltool_cache --url https://tooltool.mozilla-releng.net/ fetch && \
-    tooltool.py --manifest /builds/tooltool-manifests/mitmproxy-recordings-raptor-tp6m-youtube.manifest.previous --cache-folder /builds/tooltool_cache --url https://tooltool.mozilla-releng.net/ fetch && \
-    tooltool.py --manifest /builds/tooltool-manifests/mitmproxy-rel-bin-linux64.manifest.current --cache-folder /builds/tooltool_cache --url https://tooltool.mozilla-releng.net/ fetch && \
-    tooltool.py --manifest /builds/tooltool-manifests/mitmproxy-rel-bin-linux64.manifest.previous --cache-folder /builds/tooltool_cache --url https://tooltool.mozilla-releng.net/ fetch && \
-    chmod +rx host-utils* linux64-minidump_stackwalk && \
-    ls -la /builds/tooltool_cache/ && \
     chown -R root:root /builds/worker/.cache && \
     rm -rf /tmp/* && \
     rm -rf /var/lib/apt/lists/* && \
