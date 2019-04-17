@@ -4,6 +4,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import argparse
 import json
 import logging
 import os
@@ -32,6 +33,10 @@ def fatal(message):
     sys.exit(TBPL_RETRY_EXIT_STATUS)
 
 def main():
+    parser = argparse.ArgumentParser(
+        usage='%(prog)s [options] <test command> (<test command option> ...)',
+        description="Wrapper script for tests run on physical Android devices at Bitbar. Runs the provided command wrapped with required setup and teardown.")
+    _args, extra_args = parser.parse_known_args()
     logging.basicConfig(format='%(asctime)-15s %(levelname)s %(message)s',
                         level=logging.INFO,
                         stream=sys.stdout)
@@ -46,10 +51,6 @@ def main():
     task_cwd = os.getcwd()
     print('Current working directory: {}'.format(task_cwd))
 
-    artifacts = os.path.join(task_cwd, 'artifacts')
-    if not os.path.exists(artifacts):
-        fatal('{} does not exist.'.format(artifacts))
-
     with open('/builds/taskcluster/scriptvars.json') as scriptvars:
         scriptvarsenv = json.loads(scriptvars.read())
         print('Bitbar test run: https://mozilla.testdroid.com/#testing/device-session/{}/{}/{}'.format(
@@ -57,12 +58,7 @@ def main():
             scriptvarsenv['TESTDROID_BUILD_ID'],
             scriptvarsenv['TESTDROID_RUN_ID']))
 
-    payload = json.loads(sys.stdin.read())
-
-    print('payload = {}'.format(json.dumps(payload, indent=4)))
-
     env = dict(os.environ)
-    env.update(payload['env'])
 
     if 'PATH' in os.environ:
         path = os.environ['PATH']
@@ -82,17 +78,6 @@ def main():
     if 'HOME' not in env:
         env['HOME'] = '/builds/worker'
         print('setting HOME to {}'.format(env['HOME']))
-
-    if 'TASKCLUSTER_WORKER_TYPE' not in env:
-        fatal('TASKCLUSTER_WORKER_TYPE is missing.')
-
-    if 'WORKSPACE' not in env:
-        env['WORKSPACE'] = os.path.join(env['HOME'], 'workspace')
-        print('setting WORKSPACE to {}'.format(env['WORKSPACE']))
-    workspace = env['WORKSPACE']
-    if not os.path.exists(workspace):
-        print('Creating {}'.format(workspace))
-        os.mkdir(workspace)
 
     # If we are running normal tests we will be connected via usb and
     # there should be only one device connected.  If we are running
@@ -139,52 +124,17 @@ def main():
 
     print('environment = {}'.format(json.dumps(env, indent=4)))
 
-    os.chdir(workspace)
-    scripturl = payload['context']
-    script = os.path.basename(scripturl)
-    for attempt in range(MAX_NETWORK_ATTEMPTS):
-        try:
-            subprocess.check_output(['curl', '-O', scripturl],
-                                    stderr=subprocess.STDOUT)
-            break
-        except subprocess.CalledProcessError as e:
-            print('{} during attempt {} to download {}'.format(e, attempt, scripturl))
-            if attempt == MAX_NETWORK_ATTEMPTS - 1:
-                fatal('Downloading {}'.format(scripturl))
-
-    subprocess.check_output(['chmod', '+x', script],
-                            stderr=subprocess.STDOUT)
-
-    # Use a login shell to get the required environment for the unit
-    # test scripts to detect sys.executable correctly.  Execute the
-    # context script in the directory /builds/worker/workspace.
-    args = ['bash', '-l', '-c', ' '.join(payload['command'])]
-    print(' '.join(args))
+    # run the payload's command
+    print(' '.join(extra_args))
     rc = None
-    proc = subprocess.Popen(args,
+    proc = subprocess.Popen(extra_args,
                             env=env,
-                            cwd=workspace,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT)
     while rc == None:
         line = proc.stdout.readline()
         sys.stdout.write(line)
         rc = proc.poll()
-
-    os.chdir(task_cwd)
-
-    # Copy the requested directories to the appropriate
-    # location in the task's artifacts directory.
-    for artifact in payload['artifacts']:
-        artifact_location = os.path.join('artifacts', artifact['name'])
-        os.makedirs(artifact_location)
-        if os.path.isdir(artifact['path']):
-            copy_tree(artifact['path'], artifact_location)
-        # Temporarily remove empty files due to
-        # https://github.com/taskcluster/taskcluster-worker/issues/341
-        for f in glob(os.path.join(artifact_location, '*')):
-            if os.path.isfile(f) and os.path.getsize(f) == 0:
-                os.unlink(f)
 
     try:
         if env['DEVICE_SERIAL'].endswith(':5555'):
@@ -201,7 +151,7 @@ def main():
     except subprocess.CalledProcessError as e:
         print('{} attempting netstat'.format(e))
 
-    print('payload.py exitcode {}'.format(rc))
+    print('script.py exitcode {}'.format(rc))
     if rc == 0:
         return 0
     return 1

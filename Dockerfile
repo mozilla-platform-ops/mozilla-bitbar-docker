@@ -67,8 +67,11 @@ ADD https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-x64.tar.gz /builds/worker
 ADD https://dl.google.com/android/android-sdk_r24.3.4-linux.tgz /builds/worker/Downloads
 #COPY downloads/android-sdk_r24.3.4-linux.tgz /builds/worker/Downloads
 
-ADD https://github.com/taskcluster/taskcluster-worker/releases/download/v0.1.20/taskcluster-worker-0.1.20-linux-amd64 /usr/local/bin/taskcluster-worker
-#COPY downloads/taskcluster-worker-0.1.20-linux-amd64 /usr/local/bin/taskcluster-worker
+ADD https://github.com/taskcluster/generic-worker/releases/download/v13.0.4/generic-worker-linux-amd64 /usr/local/bin/generic-worker
+#COPY downloads/generic-worker-linux-amd64 /usr/local/bin/generic-worker
+
+ADD https://github.com/taskcluster/livelog/releases/download/v1.1.0/livelog-linux-amd64 /usr/local/bin/livelog
+#COPY downloads/livelog-linux-amd64 /usr/local/bin/livelog
 
 ADD https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip /builds/worker/Downloads
 #COPY downloads/sdk-tools-linux-4333796.zip /builds/worker/Downloads
@@ -92,7 +95,8 @@ COPY scripts/tooltool.py /usr/local/bin/tooltool.py
 # installs.
 
 RUN cd /tmp && \
-    chmod +x /usr/local/bin/taskcluster-worker && \
+    chmod +x /usr/local/bin/generic-worker && \
+    chmod +x /usr/local/bin/livelog && \
     chmod +x /usr/local/bin/tooltool.py && \
     chmod +x /usr/local/bin/entrypoint.* && \
     chmod +x /builds/taskcluster/script.py && \
