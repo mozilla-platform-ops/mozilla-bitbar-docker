@@ -17,9 +17,7 @@ fi
 
 CONF_PATH='/builds/taskcluster'
 export ED25519_PRIVKEY="$CONF_PATH/ed25519_private_key"
-export OPENPGP_PRIVKEY="$CONF_PATH/openpgp_private_key"
-# we're not using livelog yet, set key to something so g-w will start
-export LIVELOG_SECRET='not_a_key'
+export GOOGLE_APPLICATION_CREDENTIALS="/etc/google/stackdriver_credentials.json"
 # generic-worker docker hack.
 # see https://github.com/taskcluster/generic-worker/issues/151
 export USER=root
@@ -29,7 +27,7 @@ entrypoint.py
 
 cd $HOME
 generic-worker new-ed25519-keypair --file $ED25519_PRIVKEY
-generic-worker new-openpgp-keypair --file $OPENPGP_PRIVKEY
+chown worker $ED25519_PRIVKEY
 envsubst < $CONF_PATH/generic-worker.yml.template > $CONF_PATH/generic-worker.yml
 
 mkdir -p /builds/worker/.android/
@@ -37,5 +35,4 @@ mkdir -p /builds/worker/.android/
 # is looking for it worker's homedir
 ln -sf /root/.android/adbkey /builds/worker/.android/adbkey || true
 
-# run g-w in a shell with an almost-empty environ
-exec env -i bash -c ". $CONF_PATH/scriptvars.env && generic-worker run --config $CONF_PATH/generic-worker.yml"
+run_gw.py
