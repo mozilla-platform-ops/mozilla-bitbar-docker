@@ -8,6 +8,8 @@ import socket
 import subprocess
 import sys
 
+script_name = sys.argv[0]
+
 try:
     try:
         import google.cloud.logging
@@ -15,18 +17,19 @@ try:
         stackdriver_client = google.cloud.logging.Client()
         stackdriver_client.setup_logging()
     except google.auth.exceptions.DefaultCredentialsError:
-        print("WARNING: Stackdriver credentials missing. Stackdriver is not functional.")
+        print("%s/WARNING: Stackdriver credentials missing. Stackdriver is not functional." % script_name)
 except exceptions.NameError, exceptions.ImportError:
-    print("WARNING: Could not import google.cloud.logging! Stackdriver is not functional.")
+    print("%s/WARNING: Could not import google.cloud.logging! Stackdriver is not functional." % script_name)
 
 # run g-w in a shell with an almost-empty environ
 # - print to stdout & stderr
 # - log to papertrail
 
-def log_to_pt(message):
+def log_to_pt(message, print_to_screen=False):
     logging.info("%s: %s" % (hostname, message))
+    if print_to_screen:
+        print(message)
 
-script_name = sys.argv[0]
 scriptvars_json_file = '/builds/taskcluster/scriptvars.json'
 gw_config_file = "/builds/taskcluster/generic-worker.yml"
 hostname = socket.gethostname()
@@ -42,20 +45,33 @@ if os.path.exists(scriptvars_json_file):
     with open(scriptvars_json_file) as json_file:
         scriptvars_json = json.load(json_file)
 else:
-    print("INFO: '%s' does not exist." % scriptvars_json_file)
+    print("%s/INFO: '%s' does not exist." % (script_name, scriptvars_json_file))
 
-print("%s: command to run is: '%s'" % (script_name, " ".join(cmd_arr)))
+# continue until we run a non-superseded task
+while True:
+    superseded = False
+    rc = None
 
-# run command
-rc = None
-proc = subprocess.Popen(cmd_arr,
-                        env=scriptvars_json,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.STDOUT,
-                        )
-while rc == None:
-    line = proc.stdout.readline()
-    log_to_pt(line.rstrip())
-    rc = proc.poll()
-sys.stdout.flush()
+    print("%s/INFO: command to run is: '%s'" % (script_name, " ".join(cmd_arr)))
+    # run command
+    proc = subprocess.Popen(cmd_arr,
+                            env=scriptvars_json,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT,
+                            )
+
+    while rc == None:
+        line = proc.stdout.readline()
+        stripped_line = line.rstrip()
+        log_to_pt(stripped_line)
+        if 'has been superseded' in stripped_line.lower():
+            superseded = True
+        rc = proc.poll()
+    sys.stdout.flush()
+    # exit if the rc is non-zero (even if superseded) or if we've processed a real job
+    # otherwise consume another task.
+    if rc != 0 or not superseded:
+        break
+    log_to_pt("%s/INFO: task was superseded, running again..." % script_name, print_to_screen=True)
+
 sys.exit(rc)
