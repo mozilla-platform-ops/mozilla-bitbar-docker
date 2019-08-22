@@ -10,15 +10,21 @@ RUN apt-get update && \
     curl \
     dnsutils \
     ffmpeg \
+    git \
     lib32stdc++6 \
     lib32z1 \
     libavcodec-dev \
     libavformat-dev \
+    libbz2-dev \
     libcurl3 \
+    libffi-dev \
     libgconf-2-4 \
     libgtk-3-0 \
     libopencv-dev \
     libpython-dev \
+    libreadline-dev \
+    libsqlite3-dev \
+    libssl-dev \
     libswscale-dev \
     locales \
     net-tools \
@@ -26,12 +32,15 @@ RUN apt-get update && \
     openjdk-8-jdk-headless \
     python \
     python-pip \
+    python3 \
+    python3-pip \
     sudo \
     tzdata \
     unzip \
     wget \
     xvfb \
-    zip && \
+    zip \
+    zlib1g-dev && \
     apt-get clean all -y
 
 RUN mkdir /builds && \
@@ -61,21 +70,32 @@ ENV    HOME=/builds/worker \
        LC_ALL=en_US.UTF-8 \
        PATH=$PATH:/builds/worker/bin
 
+# install pyenv and python 3
+ENV PYENV_ROOT=$HOME/.pyenv
+ENV PATH=$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
+ENV PY3_VERSION=3.7.4
+ENV PY2_VERSION=2.7.16
+RUN git clone --branch v1.2.13 git://github.com/pyenv/pyenv.git .pyenv && \
+    pyenv install ${PY3_VERSION} && \
+    pyenv install ${PY2_VERSION} && \
+    pyenv global ${PY2_VERSION} ${PY3_VERSION} && \
+    pyenv rehash
+
+# download things
 ADD https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-x64.tar.gz /builds/worker/Downloads
-#COPY downloads/node-v8.11.3-linux-x64.tar.gz /builds/worker/Downloads
-
 ADD https://dl.google.com/android/android-sdk_r24.3.4-linux.tgz /builds/worker/Downloads
-#COPY downloads/android-sdk_r24.3.4-linux.tgz /builds/worker/Downloads
-
 ADD https://github.com/taskcluster/generic-worker/releases/download/v14.1.0/generic-worker-nativeEngine-linux-amd64 /usr/local/bin/generic-worker
-#COPY downloads/generic-worker-nativeEngine-linux-amd64 /usr/local/bin/generic-worker
-
 ADD https://github.com/taskcluster/livelog/releases/download/v1.1.0/livelog-linux-amd64 /usr/local/bin/livelog
-#COPY downloads/livelog-linux-amd64 /usr/local/bin/livelog
-
 ADD https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip /builds/worker/Downloads
-#COPY downloads/sdk-tools-linux-4333796.zip /builds/worker/Downloads
 
+# for testing builds (these lines mirror above), copy above artifacts from the downloads dir
+# COPY downloads/node-v8.11.3-linux-x64.tar.gz /builds/worker/Downloads
+# COPY downloads/android-sdk_r24.3.4-linux.tgz /builds/worker/Downloads
+# COPY downloads/generic-worker-nativeEngine-linux-amd64 /usr/local/bin/generic-worker
+# COPY downloads/livelog-linux-amd64 /usr/local/bin/livelog
+# COPY downloads/sdk-tools-linux-4333796.zip /builds/worker/Downloads
+
+# copy stackdriver credentials over
 COPY stackdriver_credentials.json /etc/google/stackdriver_credentials.json
 
 COPY .bashrc /root/.bashrc
@@ -111,6 +131,9 @@ RUN cd /tmp && \
     tar xzf /builds/worker/Downloads/android-sdk_r24.3.4-linux.tgz --directory=/builds/worker || true && \
     unzip -qq -n /builds/worker/Downloads/sdk-tools-linux-4333796.zip -d /builds/worker/android-sdk-linux/ || true && \
     /builds/worker/android-sdk-linux/tools/bin/sdkmanager platform-tools "build-tools;28.0.3" && \
+    pip install pip -U && \
+    pip3 install pip -U && \
+    pip install setuptools -U && \
     pip install mozdevice==3.0.5 && \
     pip install google-cloud-logging && \
     rm -rf /tmp/* && \
