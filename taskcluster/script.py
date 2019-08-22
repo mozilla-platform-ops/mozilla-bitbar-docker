@@ -11,10 +11,9 @@ import os
 import subprocess
 import sys
 
-from distutils.dir_util import copy_tree
 from glob import glob
 
-from mozdevice import ADBAndroid, ADBHost, ADBError
+from mozdevice import ADBAndroid, ADBHost, ADBError, ADBTimeoutError
 
 
 MAX_NETWORK_ATTEMPTS = 3
@@ -31,6 +30,70 @@ def fatal(message):
     TBPL_RETRY_EXIT_STATUS = 1
     print('TEST-UNEXPECTED-FAIL | bitbar | {}'.format(message))
     sys.exit(TBPL_RETRY_EXIT_STATUS)
+
+
+def get_device_type(device):
+    timeout = 10
+    device_type = device.shell_output("getprop ro.product.model", timeout=timeout)
+    if device_type == "Pixel 2":
+        pass
+    elif device_type == "Moto G (5)":
+        pass
+    else:
+        print(
+            "TEST-UNEXPECTED-FAIL | bitbar | Unknown device ('%s')! Contact Android Relops immediately."
+            % device_type
+        )
+        sys.exit(1)
+    return device_type
+
+
+def enable_charging(device, device_type):
+    rc = 0
+    timeout = 10
+    p2_path = "/sys/class/power_supply/battery/input_suspend"
+    g5_path = "/sys/class/power_supply/battery/charging_enabled"
+
+    try:
+        if device_type == "Pixel 2":
+            p2_charging_disabled = (
+                device.shell_output(
+                    "cat %s 2>/dev/null" % p2_path, timeout=timeout
+                ).strip()
+                == "1"
+            )
+            if p2_charging_disabled:
+                print("Enabling charging...")
+                device.shell_bool(
+                    "echo %s > %s" % (0, p2_path), root=True, timeout=timeout
+                )
+        elif device_type == "Moto G (5)":
+            g5_charging_disabled = (
+                device.shell_output(
+                    "cat %s 2>/dev/null" % g5_path, timeout=timeout
+                ).strip()
+                == "0"
+            )
+            if g5_charging_disabled:
+                print("Enabling charging...")
+                device.shell_bool(
+                    "echo %s > %s" % (1, g5_path), root=True, timeout=timeout
+                )
+        else:
+            print(
+                "TEST-UNEXPECTED-FAIL | bitbar | Unknown device ('%s')! Contact Android Relops immediately."
+                % device_type
+            )
+            rc = 1
+    except (ADBTimeoutError, ADBError) as e:
+        print(
+            "TEST-UNEXPECTED-FAIL | bitbar | Failed to enable charging. Contact Android Relops immediately."
+        )
+        print("{}: {}".format(e.__class__.__name__, e))
+        rc = 1
+
+    return rc
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -74,6 +137,7 @@ def main():
     env['DEVICE_SERIAL'] = scriptvarsenv['DEVICE_SERIAL']
     env['HOST_IP'] = scriptvarsenv['HOST_IP']
     env['DEVICE_IP'] = scriptvarsenv['DEVICE_IP']
+    env['DOCKER_IMAGE_VERSION'] = scriptvarsenv['DOCKER_IMAGE_VERSION']
 
     if 'HOME' not in env:
         env['HOME'] = '/builds/worker'
@@ -109,6 +173,8 @@ def main():
     print('Connecting to Android device {}'.format(env['DEVICE_SERIAL']))
     try:
         device = ADBAndroid(device=env['DEVICE_SERIAL'])
+        # this can explode if an unknown device, explode now vs in an hour...
+        device_type = get_device_type(device)
 
         # clean up the device.
         device.rm('/data/local/tests', recursive=True, force=True, root=True)
@@ -135,6 +201,10 @@ def main():
         line = proc.stdout.readline()
         sys.stdout.write(line)
         rc = proc.poll()
+
+    # enable charging on device if it is disabled
+    #   see https://bugzilla.mozilla.org/show_bug.cgi?id=1565324
+    rc = enable_charging(device, device_type) + rc
 
     try:
         if env['DEVICE_SERIAL'].endswith(':5555'):
