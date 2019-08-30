@@ -15,6 +15,7 @@ from glob import glob
 from mozdevice import ADBDevice, ADBError, ADBHost, ADBTimeoutError
 
 MAX_NETWORK_ATTEMPTS = 3
+ADB_COMMAND_TIMEOUT = 10
 
 
 def fatal(message, exception=None, retry=True):
@@ -33,8 +34,7 @@ def fatal(message, exception=None, retry=True):
     sys.exit(exit_code)
 
 def get_device_type(device):
-    timeout = 10
-    device_type = device.shell_output("getprop ro.product.model", timeout=timeout)
+    device_type = device.shell_output("getprop ro.product.model", timeout=ADB_COMMAND_TIMEOUT)
     if device_type == "Pixel 2":
         pass
     elif device_type == "Moto G (5)":
@@ -45,7 +45,6 @@ def get_device_type(device):
 
 
 def enable_charging(device, device_type):
-    timeout = 10
     p2_path = "/sys/class/power_supply/battery/input_suspend"
     g5_path = "/sys/class/power_supply/battery/charging_enabled"
 
@@ -53,26 +52,26 @@ def enable_charging(device, device_type):
         if device_type == "Pixel 2":
             p2_charging_disabled = (
                 device.shell_output(
-                    "cat %s 2>/dev/null" % p2_path, timeout=timeout
+                    "cat %s 2>/dev/null" % p2_path, timeout=ADB_COMMAND_TIMEOUT
                 ).strip()
                 == "1"
             )
             if p2_charging_disabled:
                 print("Enabling charging...")
                 device.shell_bool(
-                    "echo %s > %s" % (0, p2_path), root=True, timeout=timeout
+                    "echo %s > %s" % (0, p2_path), root=True, timeout=ADB_COMMAND_TIMEOUT
                 )
         elif device_type == "Moto G (5)":
             g5_charging_disabled = (
                 device.shell_output(
-                    "cat %s 2>/dev/null" % g5_path, timeout=timeout
+                    "cat %s 2>/dev/null" % g5_path, timeout=ADB_COMMAND_TIMEOUT
                 ).strip()
                 == "0"
             )
             if g5_charging_disabled:
                 print("Enabling charging...")
                 device.shell_bool(
-                    "echo %s > %s" % (1, g5_path), root=True, timeout=timeout
+                    "echo %s > %s" % (1, g5_path), root=True, timeout=ADB_COMMAND_TIMEOUT
                 )
         else:
             fatal("Unknown device ('%s')! Contact Android Relops immediately." % device_type, retry=False)
@@ -166,6 +165,11 @@ def main():
         print('Android device version (ro.build.version.release):  {}'.format(android_version))
         # this can explode if an unknown device, explode now vs in an hour...
         device_type = get_device_type(device)
+        # set device to UTC
+        device.shell_output('setprop persist.sys.timezone "UTC"', root=True, timeout=ADB_COMMAND_TIMEOUT)
+        # show date for visual confirmation
+        device_datetime = device.shell_output("date", timeout=ADB_COMMAND_TIMEOUT)
+        print('Android device datetime:  {}'.format(device_datetime))
 
         # clean up the device.
         device.rm('/data/local/tests', recursive=True, force=True, root=True)
