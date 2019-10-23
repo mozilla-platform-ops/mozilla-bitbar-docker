@@ -1,22 +1,21 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
-RUN apt-get update && apt-get install -y software-properties-common python-software-properties
-RUN add-apt-repository ppa:openjdk-r/ppa
-
-# libcurl3 required for minidump_stackwalk from releng tooltool
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
     apt-get install -y \
     curl \
     dnsutils \
     ffmpeg \
+    gettext-base \
     git \
     lib32stdc++6 \
     lib32z1 \
     libavcodec-dev \
     libavformat-dev \
     libbz2-dev \
-    libcurl3 \
+    libcurl4 \
+    libcurl4-openssl-dev \
     libffi-dev \
     libgconf-2-4 \
     libgtk-3-0 \
