@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -35,9 +35,9 @@ def fatal(message, exception=None, retry=True):
 
 def show_df():
     try:
-        print('\df -h\n%s\n\n' % subprocess.check_output(
+        print('\ndf -h\n%s\n\n' % subprocess.check_output(
             ['df', '-h'],
-            stderr=subprocess.STDOUT))
+            stderr=subprocess.STDOUT).decode())
     except subprocess.CalledProcessError as e:
         print('{} attempting df'.format(e))
 
@@ -47,12 +47,15 @@ def get_device_type(device):
         pass
     elif device_type == "Moto G (5)":
         pass
+    elif device_type == "Android SDK built for x86":
+        pass
     else:
         fatal("Unknown device ('%s')! Contact Android Relops immediately." % device_type, retry=False)
     return device_type
 
 
 def enable_charging(device, device_type):
+    print("script.py: enabling charging for device '%s' ('%s')..." % (device_type, device.get_info('id')['id']))
     p2_path = "/sys/class/power_supply/battery/input_suspend"
     g5_path = "/sys/class/power_supply/battery/charging_enabled"
 
@@ -81,6 +84,8 @@ def enable_charging(device, device_type):
                 device.shell_bool(
                     "echo %s > %s" % (1, g5_path), root=True, timeout=ADB_COMMAND_TIMEOUT
                 )
+        elif device_type == "Android SDK built for x86":
+            pass
         else:
             fatal("Unknown device ('%s')! Contact Android Relops immediately." % device_type, retry=False)
     except ADBError as e:
@@ -100,7 +105,7 @@ def main():
                         level=logging.INFO,
                         stream=sys.stdout)
 
-    print('\nBegin script.py')
+    print('\nscript.py: starting')
     with open('/builds/worker/version') as versionfile:
         version = versionfile.read().strip()
     print('\nDockerfile version {}'.format(version))
@@ -196,16 +201,25 @@ def main():
     print('environment = {}'.format(json.dumps(env, indent=4)))
 
     # run the payload's command
-    print(' '.join(extra_args))
+    print("script.py: running command '%s'" % ' '.join(extra_args))
     rc = None
+    bytes_read = 0
+    bytes_written = 0
     proc = subprocess.Popen(extra_args,
+                            bufsize=0,
                             env=env,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT)
-    while rc == None:
+    while True:
         line = proc.stdout.readline()
-        sys.stdout.write(line)
+        line_len = len(line)
+        bytes_read += line_len
         rc = proc.poll()
+        if line:
+            bytes_written += sys.stdout.write(str(line.decode()))
+        if line_len == 0 and bytes_written == bytes_read and rc is not None:
+            break
+    print("script.py: command finished (bytes read: %s, bytes written: %s)" % (bytes_read, bytes_written))
 
     # enable charging on device if it is disabled
     #   see https://bugzilla.mozilla.org/show_bug.cgi?id=1565324
@@ -222,13 +236,13 @@ def main():
     try:
         print('\nnetstat -aop\n%s\n\n' % subprocess.check_output(
             ['netstat', '-aop'],
-            stderr=subprocess.STDOUT))
+            stderr=subprocess.STDOUT).decode())
     except subprocess.CalledProcessError as e:
         print('{} attempting netstat'.format(e))
 
     show_df()
 
-    print('script.py exitcode {}'.format(rc))
+    print('script.py: exiting with exitcode {}.'.format(rc))
     return rc
 
 if __name__ == "__main__":
