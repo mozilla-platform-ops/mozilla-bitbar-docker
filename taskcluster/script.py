@@ -154,16 +154,16 @@ def main():
     # to connect to the device. DEVICE_SERIAL will be set to either
     # the device's serial number or its ipaddress:5555 by the framework.
     try:
-        adbhost = ADBHost()
+        adbhost = ADBHost(verbose=True)
         if env['DEVICE_SERIAL'].endswith(':5555'):
             # Power testing with adb over wifi.
             adbhost.command_output(["connect", env['DEVICE_SERIAL']])
         devices = adbhost.devices()
         print(json.dumps(devices, indent=4))
         if len(devices) != 1:
-            fatal('Must have exactly one connected device. {} found.'.format(len(devices)))
-    except ADBError as e:
-        fatal('{} Unable to obtain attached devices'.format(e))
+            fatal('Must have exactly one connected device. {} found.'.format(len(devices)), retry=True)
+    except (ADBError, ADBTimeoutError) as e:
+        fatal('{} Unable to obtain attached devices'.format(e), retry=True)
 
     try:
         for f in glob('/tmp/adb.*.log'):
@@ -192,8 +192,8 @@ def main():
         device.rm('/data/local/tmp/xpcb', recursive=True, force=True, root=True)
         device.rm('/sdcard/tests', recursive=True, force=True, root=True)
         device.rm('/sdcard/raptor-profile', recursive=True, force=True, root=True)
-    except ADBError as e:
-        fatal("{} attempting to clean up device".format(e))
+    except (ADBError, ADBTimeoutError) as e:
+        fatal("{} attempting to clean up device".format(e), retry=True)
 
     if taskcluster_debug:
         env['DEBUG'] = taskcluster_debug
@@ -231,7 +231,7 @@ def main():
             device.command_output(["usb"])
             adbhost.command_output(["disconnect", env['DEVICE_SERIAL']])
         adbhost.kill_server()
-    except ADBError as e:
+    except (ADBError, ADBTimeoutError) as e:
         print('{} attempting adb kill-server'.format(e))
 
     try:
