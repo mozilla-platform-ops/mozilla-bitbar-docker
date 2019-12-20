@@ -55,11 +55,11 @@ def get_device_type(device):
 
 
 def enable_charging(device, device_type):
-    print("script.py: enabling charging for device '%s' ('%s')..." % (device_type, device.get_info('id')['id']))
     p2_path = "/sys/class/power_supply/battery/input_suspend"
     g5_path = "/sys/class/power_supply/battery/charging_enabled"
 
     try:
+        print("script.py: enabling charging for device '%s' ('%s')..." % (device_type, device.get_info('id')['id']))
         if device_type == "Pixel 2":
             p2_charging_disabled = (
                 device.shell_output(
@@ -88,11 +88,9 @@ def enable_charging(device, device_type):
             pass
         else:
             fatal("Unknown device ('%s')! Contact Android Relops immediately." % device_type, retry=False)
-    except ADBError as e:
-        fatal("Failed to enable charging. Contact Android Relops immediately.", exception=e, retry=False)
-    except ADBTimeoutError as e:
+    except (ADBError, ADBTimeoutError) as e:
         print(
-            "TEST-WARNING | bitbar | Timed out trying to enable charging."
+            "TEST-WARNING | bitbar | Error while attempting to enable charging."
         )
         print("{}: {}".format(e.__class__.__name__, e))
 
