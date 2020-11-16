@@ -147,8 +147,13 @@ RUN cd /tmp && \
     # pips used by scripts in this docker image
     pip install google-cloud-logging && \
     pip3 install google-cloud-logging && \
-    pip install mozdevice==3.2.3 && \
-    pip3 install mozdevice==3.2.3 && \
+    pip install mozdevice==4.0.2 && \
+    pip3 install mozdevice==4.0.2 && \
+    # mozdevice 402 uses mozlog, that is missing mozfile dependency
+    # TODO: remove mozfile installation once
+    #   https://bugzilla.mozilla.org/show_bug.cgi?id=1676486 has been fixed
+    pip install mozfile &&  \
+    pip3 install mozfile &&  \
     # pips used by jobs
     pip install zstandard==0.11.1 && \
     pip3 install zstandard==0.11.1 && \
