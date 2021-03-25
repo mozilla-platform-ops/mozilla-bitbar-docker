@@ -13,10 +13,15 @@ jobs:
       - image: cimg/python:3.9.1
     steps:
       - checkout
+      # use a remote docker, so we can build a docker image
       - setup_remote_docker:
           version: 19.03.13
+      # create files required by dockerfile
+      - run: mkdir licenses
+      - run: touch licenses/fake_license
       - run: echo "invalid_version" > version
       - run: touch stackdriver_credentials.json  # placeholder to make build happy
+      # build it
       - run: docker build .
 
 workflows:
