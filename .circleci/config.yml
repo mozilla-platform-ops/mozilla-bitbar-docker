@@ -1,10 +1,22 @@
-version: 2
+version: 2.1
+
 jobs:
- build:
-   machine: true
-   steps:
-     - checkout
-     - python --version
-     - pip install pre-commit
-     - pre-commit run -a
-     - docker build .
+  pre_commit:
+    docker:
+      - image: cimg/python:3.9.1
+    steps:
+      - checkout
+      - run: pip3 install pre-commit
+      - run: pre-commit run --all-files --verbose
+  docker_build:
+    docker:
+      - image: cimg/python:3.9.1
+    steps:
+      - checkout
+      - run: docker build .
+
+workflows:
+  main_test:
+    jobs:
+      - pre_commit
+      - docker_build
