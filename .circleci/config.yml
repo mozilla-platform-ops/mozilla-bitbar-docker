@@ -1,0 +1,10 @@
+version: 2
+jobs:
+ build:
+   machine: true
+   steps:
+     - checkout
+     - python --version
+     - pip install pre-commit
+     - pre-commit run -a
+     - docker build .
