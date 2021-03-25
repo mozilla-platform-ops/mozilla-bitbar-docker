@@ -15,6 +15,7 @@ jobs:
       - checkout
       - setup_remote_docker:
           version: 19.03.13
+      - run: touch stackdriver_credentials.json  # placeholder to make build happy
       - run: docker build .
 
 workflows:
