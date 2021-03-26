@@ -2,15 +2,15 @@ version: 2.1
 
 jobs:
   test_env_vars:
-    shell: /bin/sh -leo pipefail
-    environment:
-      - BASH_ENV: /etc/profile
     docker:
       - image: cimg/python:3.9.1
     steps:
-      - checkout
-      - run: echo $FUN
-      - run: echo $fun
+      - run:
+          name: "What branch am I on?"
+          command: |
+            echo ${CIRCLE_BRANCH}
+            echo $FUN
+            echo $fun
   pre_commit:
     docker:
       - image: cimg/python:3.9.1
