@@ -1,0 +1,39 @@
+version: 2.1
+
+jobs:
+  pre_commit:
+    docker:
+      - image: cimg/python:3.9.1
+    steps:
+      - checkout
+      - run: pip3 install pre-commit
+      - run: pre-commit run --all-files --verbose
+  docker_build:
+    docker:
+      - image: cimg/python:3.9.1
+    steps:
+      - checkout
+      # use a remote docker, so we can build a docker image
+      - setup_remote_docker:
+          version: 19.03.13
+      # create files required by dockerfile
+      - run:
+          name: create unversioned files required to build
+          # TODO: commit a script that creates these once legal signs off
+          # - testing for PRs will be incomplete until then (PRs can't access the env vars)
+          #   - the build succeeds, but the android sdk is not installed
+          command: |
+            mkdir licenses
+            echo -n $android_sdk_license > licenses/android-sdk-license
+            echo -n $android_sdk_preview_license > licenses/android-sdk-preview-license
+            echo -n $intel_android_extra_license > licenses/intel-android-extra-license
+      - run: echo "ci_test_version_DO_NOT_USE" > version
+      - run: echo "fake_credential" > stackdriver_credentials.json
+      # build it
+      - run: docker build .
+
+workflows:
+  main_test:
+    jobs:
+      - pre_commit
+      - docker_build

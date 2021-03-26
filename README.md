@@ -1,4 +1,7 @@
 # mozilla-bitbar-docker
+
+[![CircleCI Status](https://circleci.com/gh/mozilla-platform-ops/mozilla-bitbar-docker.svg?style=svg)](https://app.circleci.com/pipelines/github/mozilla-platform-ops/mozilla-bitbar-docker)
+
 Definition for Mozilla Docker images used at Bitbar
 
 This repository contains the definition for the Docker images used to
