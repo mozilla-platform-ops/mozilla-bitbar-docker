@@ -1,16 +1,6 @@
 version: 2.1
 
 jobs:
-  test_env_vars:
-    docker:
-      - image: cimg/python:3.9.1
-    steps:
-      - run:
-          name: "What branch am I on?"
-          command: |
-            echo ${CIRCLE_BRANCH}
-            echo $FUN
-            echo $fun
   pre_commit:
     docker:
       - image: cimg/python:3.9.1
@@ -29,6 +19,9 @@ jobs:
       # create files required by dockerfile
       - run:
           name: create unversioned files required to build
+          # TODO: commit a script that creates these once legal signs off
+          # - testing for PRs will be incomplete until then (PRs can't access the env vars)
+          #   - the build succeeds, but the android sdk is not installed
           command: |
             mkdir licenses
             echo -n $android_sdk_license > licenses/android-sdk-license
@@ -42,6 +35,5 @@ jobs:
 workflows:
   main_test:
     jobs:
-      # - pre_commit
-      # - docker_build
-      - test_env_vars
+      - pre_commit
+      - docker_build
