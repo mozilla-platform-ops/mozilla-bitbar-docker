@@ -1,6 +1,13 @@
 version: 2.1
 
 jobs:
+  test_env_vars:
+    docker:
+      - image: cimg/python:3.9.1
+    steps:
+      - checkout
+      - run: echo $FUN
+      - run: echo $fun
   pre_commit:
     docker:
       - image: cimg/python:3.9.1
@@ -32,5 +39,6 @@ jobs:
 workflows:
   main_test:
     jobs:
-      - pre_commit
-      - docker_build
+      # - pre_commit
+      # - docker_build
+      - test_env_vars
