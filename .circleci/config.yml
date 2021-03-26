@@ -17,10 +17,13 @@ jobs:
       - setup_remote_docker:
           version: 19.03.13
       # create files required by dockerfile
-      - run: mkdir licenses
-      - run: echo -n $android_sdk_license > licenses/android-sdk-license
-      - run: echo -n $android_sdk_preview_license > licenses/android-sdk-preview-license
-      - run: echo -n $intel_android_extra_license > licenses/intel-android-extra-license
+      - run:
+          name: create unversioned files required to build
+          command: |
+            mkdir licenses
+            echo -n $android_sdk_license > licenses/android-sdk-license
+            echo -n $android_sdk_preview_license > licenses/android-sdk-preview-license
+            echo -n $intel_android_extra_license > licenses/intel-android-extra-license
       - run: echo "ci_test_version_DO_NOT_USE" > version
       - run: echo "fake_credential" > stackdriver_credentials.json
       # build it
