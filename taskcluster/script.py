@@ -53,6 +53,9 @@ def get_device_type(device):
         pass
     elif device_type == "Moto G (5)":
         pass
+    elif device_type == "SM-A515F":                                                                            
+        # samsung A51
+        pass
     elif device_type == "SM-G930F":
         # samsung s7 galaxy (exynos)
         pass
