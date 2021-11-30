@@ -53,11 +53,8 @@ def get_device_type(device):
         pass
     elif device_type == "Moto G (5)":
         pass
-    elif device_type == "SM-A515F":                                                                            
-        # samsung A51
-        pass
-    elif device_type == "SM-G930F":
-        # samsung s7 galaxy (exynos)
+    elif device_type == "SM-G930F" or device_type == "SM-A515F":
+        # samsung s7 galaxy (exynos) or samsung A51
         pass
     elif device_type == "Android SDK built for x86":
         pass
@@ -70,7 +67,7 @@ def enable_charging(device, device_type):
     p2_path = "/sys/class/power_supply/battery/input_suspend"
     g5_path = "/sys/class/power_supply/battery/charging_enabled"
     s7_path = "/sys/class/power_supply/battery/batt_slate_mode"
-    a51_path = ""
+    # a51 uses same paths as s7
 
     if not device.is_rooted:
         print("enable_charging: device is not rooted, not enabling.")
@@ -102,11 +99,7 @@ def enable_charging(device, device_type):
                 device.shell_bool(
                     "echo %s > %s" % (1, g5_path), timeout=ADB_COMMAND_TIMEOUT
                 )
-        elif device_type == "SM-A515F":
-            output = device.shell_output("ls -la /sys/class/power_supply/battery/")
-            print(output)
-            fatal('development image - testing only. exiting...')
-        elif device_type == "SM-G930F":
+        elif device_type == "SM-G930F" or device_type == "SM-A515F":
             s7_charging_disabled = (
                 device.shell_output(
                     "cat %s 2>/dev/null" % s7_path, timeout=ADB_COMMAND_TIMEOUT
