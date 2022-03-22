@@ -30,14 +30,15 @@ RUN apt-get update && \
     libssl-dev \
     libswscale-dev \
     locales \
-    mercurial \
     net-tools \
     netcat \
     openjdk-8-jdk-headless \
     python \
     python-pip \
+    python-dev \
     python3 \
     python3-pip \
+    python3-dev \
     sudo \
     tzdata \
     unzip \
@@ -149,6 +150,9 @@ RUN cd /tmp && \
     pip3 install google-cloud-logging && \
     pip install mozdevice==4.0.2 && \
     pip3 install mozdevice==4.0.2 && \
+    # install latest mercurial for py2 and py3
+    pip install mercurial && \
+    pip3 install mercurial && \
     # mozdevice 402 uses mozlog, that is missing mozfile dependency
     # TODO: remove mozfile installation once
     #   https://bugzilla.mozilla.org/show_bug.cgi?id=1676486 has been fixed
