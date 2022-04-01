@@ -87,7 +87,6 @@ ADD https://github.com/taskcluster/taskcluster/releases/download/v${TC_VERSION}/
 ADD https://github.com/taskcluster/taskcluster/releases/download/v${TC_VERSION}/livelog-linux-amd64 /usr/local/bin/livelog
 ADD https://github.com/taskcluster/taskcluster/releases/download/v${TC_VERSION}/taskcluster-proxy-linux-amd64 /usr/local/bin/taskcluster-proxy
 ADD https://github.com/taskcluster/taskcluster/releases/download/v${TC_VERSION}/start-worker-linux-amd64 /usr/local/bin/start-worker
-#ADD https://hg.mozilla.org/hgcustom/version-control-tools/raw-file/tip/hgext/robustcheckout/__init__.py /usr/local/src/robustcheckout.py
 ADD https://hg.mozilla.org/mozilla-central/raw-file/260e22f03e984e0ced16b6c5ff63201cdef0a1f6/testing/mozharness/external_tools/robustcheckout.py /usr/local/src/robustcheckout.py
 
 # for testing builds (these lines mirror above), copy above artifacts from the downloads dir
