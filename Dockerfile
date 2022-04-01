@@ -93,7 +93,7 @@ ADD https://hg.mozilla.org/mozilla-central/raw-file/260e22f03e984e0ced16b6c5ff63
 # COPY downloads/node-v8.11.3-linux-x64.tar.gz /builds/worker/Downloads
 # COPY downloads/android-sdk_r24.3.4-linux.tgz /builds/worker/Downloads
 # COPY downloads/sdk-tools-linux-4333796.zip /builds/worker/Downloads
-# COPY downloads/generic-worker-nativeEngine-linux-amd64 /usr/local/bin/generic-worker
+# COPY downloads/generic-worker-simple-linux-amd64 /usr/local/bin/generic-worker
 # COPY downloads/livelog-linux-amd64 /usr/local/bin/livelog
 # COPY downloads/taskcluster-proxy-linux-amd64 /usr/local/bin/taskcluster-proxy
 # COPY downloads/start-worker-linux-amd64 /usr/local/bin/start-worker
