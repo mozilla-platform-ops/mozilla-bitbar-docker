@@ -30,14 +30,15 @@ RUN apt-get update && \
     libssl-dev \
     libswscale-dev \
     locales \
-    mercurial \
     net-tools \
     netcat \
     openjdk-8-jdk-headless \
     python \
     python-pip \
+    python-dev \
     python3 \
     python3-pip \
+    python3-dev \
     sudo \
     tzdata \
     unzip \
@@ -86,13 +87,14 @@ ADD https://github.com/taskcluster/taskcluster/releases/download/v${TC_VERSION}/
 ADD https://github.com/taskcluster/taskcluster/releases/download/v${TC_VERSION}/livelog-linux-amd64 /usr/local/bin/livelog
 ADD https://github.com/taskcluster/taskcluster/releases/download/v${TC_VERSION}/taskcluster-proxy-linux-amd64 /usr/local/bin/taskcluster-proxy
 ADD https://github.com/taskcluster/taskcluster/releases/download/v${TC_VERSION}/start-worker-linux-amd64 /usr/local/bin/start-worker
-ADD https://hg.mozilla.org/hgcustom/version-control-tools/raw-file/tip/hgext/robustcheckout/__init__.py /usr/local/src/robustcheckout.py
+# robust checkout plugin: update sha1 to latest when building a new image
+ADD https://hg.mozilla.org/mozilla-central/raw-file/260e22f03e984e0ced16b6c5ff63201cdef0a1f6/testing/mozharness/external_tools/robustcheckout.py /usr/local/src/robustcheckout.py
 
 # for testing builds (these lines mirror above), copy above artifacts from the downloads dir
 # COPY downloads/node-v8.11.3-linux-x64.tar.gz /builds/worker/Downloads
 # COPY downloads/android-sdk_r24.3.4-linux.tgz /builds/worker/Downloads
 # COPY downloads/sdk-tools-linux-4333796.zip /builds/worker/Downloads
-# COPY downloads/generic-worker-nativeEngine-linux-amd64 /usr/local/bin/generic-worker
+# COPY downloads/generic-worker-simple-linux-amd64 /usr/local/bin/generic-worker
 # COPY downloads/livelog-linux-amd64 /usr/local/bin/livelog
 # COPY downloads/taskcluster-proxy-linux-amd64 /usr/local/bin/taskcluster-proxy
 # COPY downloads/start-worker-linux-amd64 /usr/local/bin/start-worker
@@ -149,6 +151,9 @@ RUN cd /tmp && \
     pip3 install google-cloud-logging && \
     pip install mozdevice==4.0.2 && \
     pip3 install mozdevice==4.0.2 && \
+    # install latest mercurial for py2 and py3
+    pip install mercurial==5.9.3 && \
+    pip3 install mercurial==5.9.3 && \
     # mozdevice 402 uses mozlog, that is missing mozfile dependency
     # TODO: remove mozfile installation once
     #   https://bugzilla.mozilla.org/show_bug.cgi?id=1676486 has been fixed
