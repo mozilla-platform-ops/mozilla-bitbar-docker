@@ -25,7 +25,7 @@ RUN apt-get update && \
     libgconf-2-4 \
     libgtk-3-0 \
     libopencv-dev \
-    libpython-dev \
+    libpython3-dev \
     libreadline-dev \
     libsqlite3-dev \
     libssl-dev \
@@ -34,9 +34,6 @@ RUN apt-get update && \
     net-tools \
     netcat \
     openjdk-8-jdk-headless \
-    python \
-    python-pip \
-    python-dev \
     python3 \
     python3-pip \
     python3-dev \
