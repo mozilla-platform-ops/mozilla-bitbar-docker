@@ -152,11 +152,6 @@ RUN cd /tmp && \
     # install latest mercurial for py2 and py3
     pip install mercurial==5.9.3 && \
     pip3 install mercurial==5.9.3 && \
-    # mozdevice 402 uses mozlog, that is missing mozfile dependency
-    # TODO: remove mozfile installation once
-    #   https://bugzilla.mozilla.org/show_bug.cgi?id=1676486 has been fixed
-    pip install mozfile &&  \
-    pip3 install mozfile &&  \
     # pips used by jobs
     pip install zstandard==0.11.1 && \
     pip3 install zstandard==0.11.1 && \
