@@ -139,21 +139,15 @@ RUN cd /tmp && \
     unzip -qq -n /builds/worker/Downloads/sdk-tools-linux-4333796.zip -d /builds/worker/android-sdk-linux/ || true && \
     /builds/worker/android-sdk-linux/tools/bin/sdkmanager platform-tools "build-tools;28.0.3" && \
     # upgrade the builtin setuptools
-    pip install setuptools -U && \
     pip3 install setuptools -U && \
     # upgrade six, used by mozdevice
-    pip install six -U && \
     pip3 install six -U && \
     # pips used by scripts in this docker image
-    pip install google-cloud-logging && \
     pip3 install google-cloud-logging && \
-    pip install mozdevice==4.0.2 && \
     pip3 install mozdevice==4.0.2 && \
     # install latest mercurial for py2 and py3
-    pip install mercurial==5.9.3 && \
     pip3 install mercurial==5.9.3 && \
     # pips used by jobs
-    pip install zstandard==0.11.1 && \
     pip3 install zstandard==0.11.1 && \
     # cleanup
     rm -rf /tmp/* && \
