@@ -144,7 +144,7 @@ RUN cd /tmp && \
     pip3 install six -U && \
     # pips used by scripts in this docker image
     pip3 install google-cloud-logging && \
-    pip3 install mozdevice==4.0.2 && \
+    pip3 install mozdevice && \
     # install latest mercurial for py2 and py3
     pip3 install mercurial==5.9.3 && \
     # pips used by jobs
