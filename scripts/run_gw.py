@@ -68,7 +68,7 @@ while True:
                             )
 
     while rc == None:
-        line = proc.stdout.readline()
+        line = proc.stdout.readline().decode('UTF-8')
         stripped_line = line.rstrip()
         log_to_pt(stripped_line)
         if 'has been superseded' in stripped_line.lower():
