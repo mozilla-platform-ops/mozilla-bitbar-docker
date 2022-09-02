@@ -21,6 +21,7 @@ fi
 
 datelabel=$(date  +%Y%m%dT%H%M%S)
 echo $datelabel > version
+# TODO: switch to an include list? exclude is getting large
 zip -r build/mozilla-docker-$datelabel.zip . -x@zipexclude.lst
 zip -r build/mozilla-docker-$datelabel-public.zip . -x@zipexclude.lst
 
