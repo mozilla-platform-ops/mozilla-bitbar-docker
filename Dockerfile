@@ -37,6 +37,7 @@ RUN apt-get update && \
     python3 \
     python3-pip \
     python3-dev \
+    software-properties-common \
     sudo \
     tzdata \
     unzip \
@@ -44,7 +45,10 @@ RUN apt-get update && \
     xvfb \
     zip \
     zlib1g-dev \
-    zstd && \
+    zstd
+
+RUN add-apt-repository -y ppa:deadsnakes/ppa && \
+    apt install -y python3.9 python3.9-distutils python3.9-venv python3.9-full && \
     apt-get clean all -y
 
 RUN mkdir /builds && \
@@ -155,6 +159,11 @@ RUN cd /tmp && \
     rm -rf /builds/worker/Downloads/* && \
     chown -R root:worker /builds && \
     chmod 775 /builds
+
+# changing the default to 3.9 messes with other stuff (3.9 is missing pips?), so do last
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 2 && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
+
 
 ENTRYPOINT ["entrypoint.sh"]
 USER worker
