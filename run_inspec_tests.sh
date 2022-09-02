@@ -17,7 +17,7 @@ docker run \
     -e TASKCLUSTER_ACCESS_TOKEN='not_a_real_secret' \
     -e gecko_t_ap_test_g5="SECRET_SECRET_SECRET_DO NOT LEAK 1" \
     -e TESTDROID_APIKEY="SECRET_SECRET_SECRET_DO NOT LEAK 2" \
-    -d -t test-docker
+    -d -t devicepool
 
 # TODO: run test
 inspec exec image_tests -t docker://$name || true
