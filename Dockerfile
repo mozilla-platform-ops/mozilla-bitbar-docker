@@ -14,8 +14,6 @@ RUN apt-get update && \
     gettext-base \
     git \
     imagemagick \
-    lib32stdc++6 \
-    lib32z1 \
     libavcodec-dev \
     libavformat-dev \
     libbz2-dev \
