@@ -11,3 +11,4 @@ zipexclude.lst
 .pytest_cache/*
 .vscode/*
 .circleci/*
+image_tests/*
