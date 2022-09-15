@@ -1,4 +1,5 @@
-FROM ubuntu:18.04@sha256:017eef0b616011647b269b5c65826e2e2ebddbe5d1f8c1e56b3599fb14fabec8
+# get sha256 from `docker pull`
+FROM ubuntu:22.04@sha256:34fea4f31bf187bc915536831fd0afc9d214755bf700b5cdb1336c82516d154e
 
 # controls the version of taskcluster components installed below
 ARG TC_VERSION="36.0.0"
@@ -13,8 +14,6 @@ RUN apt-get update && \
     gettext-base \
     git \
     imagemagick \
-    lib32stdc++6 \
-    lib32z1 \
     libavcodec-dev \
     libavformat-dev \
     libbz2-dev \
@@ -24,7 +23,7 @@ RUN apt-get update && \
     libgconf-2-4 \
     libgtk-3-0 \
     libopencv-dev \
-    libpython-dev \
+    libpython3-dev \
     libreadline-dev \
     libsqlite3-dev \
     libssl-dev \
@@ -33,12 +32,10 @@ RUN apt-get update && \
     net-tools \
     netcat \
     openjdk-8-jdk-headless \
-    python \
-    python-pip \
-    python-dev \
     python3 \
     python3-pip \
     python3-dev \
+    software-properties-common \
     sudo \
     tzdata \
     unzip \
@@ -46,8 +43,13 @@ RUN apt-get update && \
     xvfb \
     zip \
     zlib1g-dev \
-    zstd && \
-    apt-get clean all -y
+    zstd
+
+RUN add-apt-repository -y ppa:deadsnakes/ppa && \
+    apt install -y python3.9 python3.9-distutils python3.9-venv python3.9-dev && \
+    apt-get clean all -y && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 2 && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
 
 RUN mkdir /builds && \
     useradd -d /builds/worker -s /bin/bash -m worker
@@ -141,26 +143,15 @@ RUN cd /tmp && \
     unzip -qq -n /builds/worker/Downloads/sdk-tools-linux-4333796.zip -d /builds/worker/android-sdk-linux/ || true && \
     /builds/worker/android-sdk-linux/tools/bin/sdkmanager platform-tools "build-tools;28.0.3" && \
     # upgrade the builtin setuptools
-    pip install setuptools -U && \
     pip3 install setuptools -U && \
     # upgrade six, used by mozdevice
-    pip install six -U && \
     pip3 install six -U && \
     # pips used by scripts in this docker image
-    pip install google-cloud-logging && \
     pip3 install google-cloud-logging && \
-    pip install mozdevice==4.0.2 && \
-    pip3 install mozdevice==4.0.2 && \
+    pip3 install mozdevice && \
     # install latest mercurial for py2 and py3
-    pip install mercurial==5.9.3 && \
     pip3 install mercurial==5.9.3 && \
-    # mozdevice 402 uses mozlog, that is missing mozfile dependency
-    # TODO: remove mozfile installation once
-    #   https://bugzilla.mozilla.org/show_bug.cgi?id=1676486 has been fixed
-    pip install mozfile &&  \
-    pip3 install mozfile &&  \
     # pips used by jobs
-    pip install zstandard==0.11.1 && \
     pip3 install zstandard==0.11.1 && \
     # cleanup
     rm -rf /tmp/* && \

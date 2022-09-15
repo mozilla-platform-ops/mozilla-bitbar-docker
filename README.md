@@ -27,11 +27,22 @@ into the final Docker image.
 
 ### Build new image test zip file
 
-1. Create the zip file containing the test zip file to be used.
+1. Install InSpec and run tests.
+
+Install InSpec if not installed already (https://docs.chef.io/inspec/install/).
+
+```bash
+# build the docker image
+docker build -t devicepool .
+
+# run tests against an instance of the image
+./run_inspec_tests.sh
+```
+
+2. Create the zip file containing the test zip file to be used.
 
 ``` bash
 ./build.sh
-
 ```
 
 This will create the following files in the in the `build`

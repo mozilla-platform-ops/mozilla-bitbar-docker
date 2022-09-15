@@ -21,7 +21,7 @@ fi
 
 datelabel=$(date  +%Y%m%dT%H%M%S)
 echo $datelabel > version
-zip -r build/mozilla-docker-$datelabel.zip . -x@zipexclude.lst
-zip -r build/mozilla-docker-$datelabel-public.zip . -x@zipexclude.lst
+zip -r build/mozilla-docker-$datelabel.zip . -i@zipinclude.lst
+zip -r build/mozilla-docker-$datelabel-public.zip . -i@zipinclude.lst
 
 popd

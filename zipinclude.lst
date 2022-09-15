@@ -1,0 +1,7 @@
+.bashrc
+Dockerfile
+licenses/*
+scripts/*
+stackdriver_credentials.json
+taskcluster/*
+version
