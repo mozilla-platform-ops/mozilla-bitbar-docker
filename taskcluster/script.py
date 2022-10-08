@@ -49,7 +49,7 @@ def show_df():
 
 def get_device_type(device):
     device_type = device.shell_output("getprop ro.product.model", timeout=ADB_COMMAND_TIMEOUT)
-    if device_type == "Pixel 2":
+    if device_type == "Pixel 2" or device_type == "Pixel 5":
         pass
     elif device_type == "Moto G (5)":
         pass
@@ -75,7 +75,7 @@ def enable_charging(device, device_type):
 
     try:
         print("script.py: enabling charging for device '%s' ('%s')..." % (device_type, device.get_info('id')['id']))
-        if device_type == "Pixel 2":
+        if device_type == "Pixel 2" or device_type == "Pixel 5":
             p2_charging_disabled = (
                 device.shell_output(
                     "cat %s 2>/dev/null" % p2_path, timeout=ADB_COMMAND_TIMEOUT
