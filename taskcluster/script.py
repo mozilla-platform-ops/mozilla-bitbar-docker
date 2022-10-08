@@ -88,7 +88,7 @@ def enable_charging(device, device_type):
                 device.shell_bool(
                     "echo %s > %s" % (0, p2_path), timeout=ADB_COMMAND_TIMEOUT
                 )
-        elif device_type == "Pixel 5":     
+        elif device_type == "Pixel 5":
             # p5 detection seems difficult per https://github.com/VR-25/acc/issues/78
             # so just enable every time
             print("Enabling charging (did not check if disabled)...")
