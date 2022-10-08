@@ -65,7 +65,7 @@ def get_device_type(device):
 
 def enable_charging(device, device_type):
     p2_path = "/sys/class/power_supply/battery/input_suspend"
-    p5_path = " /sys/class/power_supply/sm7250_bms/charge_disable"
+    p5_path = "/sys/class/power_supply/sm7250_bms/charge_disable"
     g5_path = "/sys/class/power_supply/battery/charging_enabled"
     s7_path = "/sys/class/power_supply/battery/batt_slate_mode"
     # a51 uses same paths as s7
