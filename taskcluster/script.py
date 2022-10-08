@@ -65,6 +65,7 @@ def get_device_type(device):
 
 def enable_charging(device, device_type):
     p2_path = "/sys/class/power_supply/battery/input_suspend"
+    p5_path = " /sys/class/power_supply/sm7250_bms/charge_disable"
     g5_path = "/sys/class/power_supply/battery/charging_enabled"
     s7_path = "/sys/class/power_supply/battery/batt_slate_mode"
     # a51 uses same paths as s7
@@ -75,7 +76,7 @@ def enable_charging(device, device_type):
 
     try:
         print("script.py: enabling charging for device '%s' ('%s')..." % (device_type, device.get_info('id')['id']))
-        if device_type == "Pixel 2" or device_type == "Pixel 5":
+        if device_type == "Pixel 2":
             p2_charging_disabled = (
                 device.shell_output(
                     "cat %s 2>/dev/null" % p2_path, timeout=ADB_COMMAND_TIMEOUT
@@ -87,6 +88,13 @@ def enable_charging(device, device_type):
                 device.shell_bool(
                     "echo %s > %s" % (0, p2_path), timeout=ADB_COMMAND_TIMEOUT
                 )
+        elif device_type == "Pixel 5":     
+            # p5 detection seems difficult per https://github.com/VR-25/acc/issues/78
+            # so just enable every time
+            print("Enabling charging (did not check if disabled)...")
+            device.shell_bool(
+                "echo %s > %s" % (0, p5_path), timeout=ADB_COMMAND_TIMEOUT
+            )
         elif device_type == "Moto G (5)":
             g5_charging_disabled = (
                 device.shell_output(
