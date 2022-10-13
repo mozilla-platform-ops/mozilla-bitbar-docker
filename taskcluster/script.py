@@ -49,7 +49,7 @@ def show_df():
 
 def get_device_type(device):
     device_type = device.shell_output("getprop ro.product.model", timeout=ADB_COMMAND_TIMEOUT)
-    if device_type == "Pixel 2":
+    if device_type == "Pixel 2" or device_type == "Pixel 5":
         pass
     elif device_type == "Moto G (5)":
         pass
@@ -65,6 +65,7 @@ def get_device_type(device):
 
 def enable_charging(device, device_type):
     p2_path = "/sys/class/power_supply/battery/input_suspend"
+    p5_path = "/sys/class/power_supply/sm7250_bms/charge_disable"
     g5_path = "/sys/class/power_supply/battery/charging_enabled"
     s7_path = "/sys/class/power_supply/battery/batt_slate_mode"
     # a51 uses same paths as s7
@@ -86,6 +87,18 @@ def enable_charging(device, device_type):
                 print("Enabling charging...")
                 device.shell_bool(
                     "echo %s > %s" % (0, p2_path), timeout=ADB_COMMAND_TIMEOUT
+                )
+        elif device_type == "Pixel 5":
+            p5_charging_disabled = (
+                device.shell_output(
+                    "cat %s 2>/dev/null" % p5_path, timeout=ADB_COMMAND_TIMEOUT
+                ).strip()
+                == "1"
+            )
+            if p5_charging_disabled:
+                print("Enabling charging...")
+                device.shell_bool(
+                    "echo %s > %s" % (0, p5_path), timeout=ADB_COMMAND_TIMEOUT
                 )
         elif device_type == "Moto G (5)":
             g5_charging_disabled = (
