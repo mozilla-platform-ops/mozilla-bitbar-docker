@@ -47,6 +47,7 @@ def show_df():
         print('{} attempting df'.format(e))
 
 
+# TODO: rename to ensure_known_device or similar
 def get_device_type(device):
     device_type = device.shell_output("getprop ro.product.model", timeout=ADB_COMMAND_TIMEOUT)
     if device_type == "Pixel 2" or device_type == "Pixel 5":
@@ -229,8 +230,14 @@ def main():
         device = ADBDevice(device=env['DEVICE_SERIAL'])
         android_version = device.get_prop('ro.build.version.release')
         print('Android device version (ro.build.version.release):  {}'.format(android_version))
+
+        # power testing
+        #   - 10/23 (aje): disabled as per Sparky we're not going to be doing power testing
+        #     - they will let us know if this changes
+        #
         # this can explode if an unknown device, explode now vs in an hour...
-        device_type = get_device_type(device)
+        #device_type = get_device_type(device)
+
         # set device to UTC
         if device.is_rooted:
             device.shell_output('setprop persist.sys.timezone "UTC"', timeout=ADB_COMMAND_TIMEOUT)
@@ -297,9 +304,13 @@ def main():
             break
     print("script.py: command finished")
 
+    # power testing
+    #   - 10/23 (aje): disabled as per Sparky we're not going to be doing power testing
+    #     - they will let us know if this changes
+    #
     # enable charging on device if it is disabled
     #   see https://bugzilla.mozilla.org/show_bug.cgi?id=1565324
-    enable_charging(device, device_type)
+    #enable_charging(device, device_type)
 
     try:
         if env['DEVICE_SERIAL'].endswith(':5555'):
