@@ -6,6 +6,10 @@ ARG TC_VERSION="60.4.2"
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# fix for hang during installation of ca-certificates-java
+RUN rmdir /etc/ssl/certs/java || true
+RUN mkdir -p /etc/ssl/certs/java
+
 RUN apt-get update && \
     apt-get install -y \
     curl \
@@ -151,8 +155,9 @@ RUN cd /tmp && \
     # pips used by scripts in this docker image
     pip3 install google-cloud-logging && \
     pip3 install mozdevice && \
-    # install latest mercurial for py2 and py3
-    pip3 install mercurial==6.6.3 && \
+    # install mercurial
+    # - SETUPTOOLS_USE_DISTUTILS fixes `AttributeError: install_layout. Did you mean: 'install_platlib'?` error
+    SETUPTOOLS_USE_DISTUTILS=stdlib pip3 install mercurial==6.6.3 && \
     # pips used by jobs
     pip3 install zstandard==0.22.0 && \
     # cleanup
