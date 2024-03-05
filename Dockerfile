@@ -152,9 +152,9 @@ RUN cd /tmp && \
     pip3 install google-cloud-logging && \
     pip3 install mozdevice && \
     # install latest mercurial for py2 and py3
-    pip3 install mercurial==5.9.3 && \
+    pip3 install mercurial==6.6.3 && \
     # pips used by jobs
-    pip3 install zstandard==0.11.1 && \
+    pip3 install zstandard==0.22.0 && \
     # cleanup
     rm -rf /tmp/* && \
     rm -rf /var/lib/apt/lists/* && \
