@@ -46,10 +46,12 @@ RUN apt-get update && \
     zstd
 
 RUN add-apt-repository -y ppa:deadsnakes/ppa && \
-    apt install -y python3.9 python3.9-distutils python3.9-venv python3.9-dev && \
+    apt install -y python3.9 python3.9-distutils python3.9-venv python3.9-dev \
+                    python3.11 python3.11-distutils python3.11-venv python3.11-dev && \
     apt-get clean all -y && \
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 2 && \
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1 && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 2 && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 3
 
 RUN mkdir /builds && \
     useradd -d /builds/worker -s /bin/bash -m worker
