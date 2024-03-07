@@ -91,6 +91,7 @@ ENV    HOME=/builds/worker \
 ADD https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-x64.tar.gz /builds/worker/Downloads
 ADD https://dl.google.com/android/android-sdk_r24.3.4-linux.tgz /builds/worker/Downloads
 ADD https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip /builds/worker/Downloads
+ADD https://dl.google.com/android/repository/platform-tools_r34.0.5-linux.zip /builds/worker/Downloads
 ADD https://github.com/taskcluster/taskcluster/releases/download/v${TC_VERSION}/generic-worker-simple-linux-amd64 /usr/local/bin/generic-worker
 ADD https://github.com/taskcluster/taskcluster/releases/download/v${TC_VERSION}/livelog-linux-amd64 /usr/local/bin/livelog
 ADD https://github.com/taskcluster/taskcluster/releases/download/v${TC_VERSION}/taskcluster-proxy-linux-amd64 /usr/local/bin/taskcluster-proxy
@@ -147,7 +148,10 @@ RUN cd /tmp && \
     npm -v && \
     tar xzf /builds/worker/Downloads/android-sdk_r24.3.4-linux.tgz --directory=/builds/worker || true && \
     unzip -qq -n /builds/worker/Downloads/sdk-tools-linux-4333796.zip -d /builds/worker/android-sdk-linux/ || true && \
-    /builds/worker/android-sdk-linux/tools/bin/sdkmanager platform-tools "build-tools;28.0.3" && \
+    # old, delivers newer 35.0.0 adb that is broken
+    #/builds/worker/android-sdk-linux/tools/bin/sdkmanager platform-tools "build-tools;28.0.3" && \
+    # new, delivers 34.0.5 adb that works
+    unzip -qq /builds/worker/Downloads/platform-tools_r34.0.5-linux.zip -d /builds/worker/android-sdk-linux/ || true && \
     # upgrade the builtin setuptools
     pip3 install setuptools -U && \
     # upgrade six, used by mozdevice
