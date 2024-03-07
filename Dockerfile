@@ -1,10 +1,14 @@
 # get sha256 from `docker pull`
-FROM ubuntu:22.04@sha256:34fea4f31bf187bc915536831fd0afc9d214755bf700b5cdb1336c82516d154e
+FROM --platform=linux/amd64 ubuntu:22.04@sha256:34fea4f31bf187bc915536831fd0afc9d214755bf700b5cdb1336c82516d154e
 
 # controls the version of taskcluster components installed below
-ARG TC_VERSION="36.0.0"
+ARG TC_VERSION="60.4.2"
 
 ENV DEBIAN_FRONTEND=noninteractive
+
+# fix for hang during installation of ca-certificates-java
+RUN rmdir /etc/ssl/certs/java || true
+RUN mkdir -p /etc/ssl/certs/java
 
 RUN apt-get update && \
     apt-get install -y \
@@ -46,10 +50,12 @@ RUN apt-get update && \
     zstd
 
 RUN add-apt-repository -y ppa:deadsnakes/ppa && \
-    apt install -y python3.9 python3.9-distutils python3.9-venv python3.9-dev && \
+    apt install -y python3.9 python3.9-distutils python3.9-venv python3.9-dev \
+                    python3.11 python3.11-distutils python3.11-venv python3.11-dev && \
     apt-get clean all -y && \
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 2 && \
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1 && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 2 && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 3
 
 RUN mkdir /builds && \
     useradd -d /builds/worker -s /bin/bash -m worker
@@ -85,6 +91,7 @@ ENV    HOME=/builds/worker \
 ADD https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-x64.tar.gz /builds/worker/Downloads
 ADD https://dl.google.com/android/android-sdk_r24.3.4-linux.tgz /builds/worker/Downloads
 ADD https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip /builds/worker/Downloads
+ADD https://dl.google.com/android/repository/platform-tools_r34.0.5-linux.zip /builds/worker/Downloads
 ADD https://github.com/taskcluster/taskcluster/releases/download/v${TC_VERSION}/generic-worker-simple-linux-amd64 /usr/local/bin/generic-worker
 ADD https://github.com/taskcluster/taskcluster/releases/download/v${TC_VERSION}/livelog-linux-amd64 /usr/local/bin/livelog
 ADD https://github.com/taskcluster/taskcluster/releases/download/v${TC_VERSION}/taskcluster-proxy-linux-amd64 /usr/local/bin/taskcluster-proxy
@@ -141,7 +148,10 @@ RUN cd /tmp && \
     npm -v && \
     tar xzf /builds/worker/Downloads/android-sdk_r24.3.4-linux.tgz --directory=/builds/worker || true && \
     unzip -qq -n /builds/worker/Downloads/sdk-tools-linux-4333796.zip -d /builds/worker/android-sdk-linux/ || true && \
-    /builds/worker/android-sdk-linux/tools/bin/sdkmanager platform-tools "build-tools;28.0.3" && \
+    # old, delivers newer 35.0.0 adb that is broken
+    #/builds/worker/android-sdk-linux/tools/bin/sdkmanager platform-tools "build-tools;28.0.3" && \
+    # new, delivers 34.0.5 adb that works
+    unzip -qq /builds/worker/Downloads/platform-tools_r34.0.5-linux.zip -d /builds/worker/android-sdk-linux/ || true && \
     # upgrade the builtin setuptools
     pip3 install setuptools -U && \
     # upgrade six, used by mozdevice
@@ -149,10 +159,11 @@ RUN cd /tmp && \
     # pips used by scripts in this docker image
     pip3 install google-cloud-logging && \
     pip3 install mozdevice && \
-    # install latest mercurial for py2 and py3
-    pip3 install mercurial==5.9.3 && \
+    # install mercurial
+    # - SETUPTOOLS_USE_DISTUTILS fixes `AttributeError: install_layout. Did you mean: 'install_platlib'?` error
+    SETUPTOOLS_USE_DISTUTILS=stdlib pip3 install mercurial==6.6.3 && \
     # pips used by jobs
-    pip3 install zstandard==0.11.1 && \
+    pip3 install zstandard==0.22.0 && \
     # cleanup
     rm -rf /tmp/* && \
     rm -rf /var/lib/apt/lists/* && \
