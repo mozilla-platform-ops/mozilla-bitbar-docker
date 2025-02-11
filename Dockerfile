@@ -31,7 +31,7 @@ RUN apt-get update && \
     locales \
     net-tools \
     netcat \
-    openjdk-8-jdk-headless \
+    openjdk-17-jdk-headless \
     python3 \
     python3-pip \
     python3-dev \
@@ -59,14 +59,14 @@ RUN mkdir /builds && \
 WORKDIR /builds/worker
 RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 && \
     mkdir -p \
-        android-sdk-linux \
-        Documents \
-        Downloads \
-        Pictures \
-        Music \
-        Videos \
-        bin \
-        .cache
+    android-sdk-linux \
+    Documents \
+    Downloads \
+    Pictures \
+    Music \
+    Videos \
+    bin \
+    .cache
 
 # Set variables normally configured at login, by the shells parent process, these
 # are taken from GNU su manual
@@ -74,12 +74,12 @@ RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 #   - see https://bugzilla.mozilla.org/show_bug.cgi?id=1600833
 
 ENV    HOME=/builds/worker \
-       SHELL=/bin/bash \
-       LANGUAGE=en_US.UTF-8 \
-       LANG=en_US.UTF-8 \
-       LC_ALL=en_US.UTF-8 \
-       PYTHONIOENCODING=utf-8 \
-       PATH=$PATH:/builds/worker/bin
+    SHELL=/bin/bash \
+    LANGUAGE=en_US.UTF-8 \
+    LANG=en_US.UTF-8 \
+    LC_ALL=en_US.UTF-8 \
+    PYTHONIOENCODING=utf-8 \
+    PATH=$PATH:/builds/worker/bin
 
 # download things
 ADD https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-x64.tar.gz /builds/worker/Downloads
