@@ -171,8 +171,8 @@ RUN cd /tmp && \
     chmod +x /usr/local/bin/entrypoint.* && \
     chmod +x /builds/taskcluster/script.py && \
     chmod 644 /usr/local/src/robustcheckout.py && \
-    mkdir /root/.android && \
-    touch /root/.android/repositories.cfg && \
+    # mkdir /root/.android && \
+    # touch /root/.android/repositories.cfg && \
     tar xzf /builds/worker/Downloads/node-v8.11.3-linux-x64.tar.gz -C /usr/local --strip-components 1 && \
     node -v && \
     npm -v && \
