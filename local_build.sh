@@ -11,14 +11,17 @@ if [ "$1" == "--no-cache" ]; then
   NO_CACHE="--no-cache"
 fi
 
-# if CIRCLE_BRANCH is defined, have a special if block
+# if we're on CircleCI (CIRCLE_BRANCH is defined), do special stuff
 if [ -n "$CIRCLE_BRANCH" ]; then
-    docker build $NO_CACHE -t "$DOCKER_IMAGE_NAME" .
+    PLATFORM_ARG=""
 else
     # clean up
     docker-clean
     # echo the build command
     set +x
-    # build the docker image
-    docker build $NO_CACHE --platform="$LINUX_PLAT" -t "$DOCKER_IMAGE_NAME" .
+    # set platform arg
+    PLATFORM_ARG="--platform=$LINUX_PLAT"
 fi
+
+# build the docker image
+docker build $NO_CACHE $PLATFORM_ARG -t "$DOCKER_IMAGE_NAME" .

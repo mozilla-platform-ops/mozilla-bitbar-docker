@@ -9,9 +9,16 @@ set -e
 
 name="devicepool-inspec-testing"
 
+# if we're on CircleCI (CIRCLE_BRANCH is defined), do special stuff
+if [ -n "$CIRCLE_BRANCH" ]; then
+    platform_arg=""
+else
+    platform_arg="--platform=$LINUX_PLAT"
+fi
+
 docker run \
     --name $name \
-    --platform="$LINUX_PLAT" \
+    $platform_arg \
     -u root \
     -e DEVICE_NAME='aje-test' \
     -e TC_WORKER_TYPE='gecko-t-ap-test-g5' \
