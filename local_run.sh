@@ -23,8 +23,9 @@ fi
 
 set -x
 
-# --platform=linux/amd64 \
-docker run -u root \
+# docker create --name "$DOCKER_IMAGE_NAME" "$DOCKER_IMAGE_NAME"
+
+docker run --rm -u root \
   -v "$(pwd)":/work \
   --platform="$LINUX_PLAT" \
   -e DEVICE_NAME='aje-test' \

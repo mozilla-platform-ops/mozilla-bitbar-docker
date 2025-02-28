@@ -30,7 +30,9 @@ jobs:
       - run: echo "ci_test_version_DO_NOT_USE" > version
       - run: echo "fake_credential" > stackdriver_credentials.json
       # build it
-      - run: docker build .
+      - run: ./local_build.sh
+      # test it
+      - run: ./inspec_test.sh
 
 workflows:
   main_test:

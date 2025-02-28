@@ -8,4 +8,4 @@ set -x
 # ./cleanup.sh
 docker-cleanup
 
-docker create --name "$DOCKER_IMAGE_NAME" "$DOCKER_IMAGE_NAME"
+docker build --platform="$LINUX_PLAT" -t "$DOCKER_IMAGE_NAME" .
