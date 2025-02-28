@@ -1,6 +1,9 @@
 title "android checks"
 
 path_env = [
+  '/opt/android-sdk/platform-tools',
+  '/opt/android-sdk/cmdline-tools/latest/bin',
+  # older paths
   '/usr/local/sbin',
   '/usr/local/bin',
   '/usr/sbin',
@@ -27,7 +30,8 @@ end
 
 describe bash("PATH=#{path_env} sdkmanager --version") do
   its('exit_status') { should eq 0 }
-  its('stdout') { should match /24.3.4/ }
+  # its('stdout') { should match /24.3.4/ }
+  its('stdout') { should match /7.0/ }
 end
 
 # describe bash("PATH=#{path_env} avdmanager --version") do
