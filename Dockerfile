@@ -1,6 +1,5 @@
 # get sha256 from `docker pull`
-FROM ubuntu:22.04
-#@sha256:34fea4f31bf187bc915536831fd0afc9d214755bf700b5cdb1336c82516d154e
+FROM ubuntu:22.04@sha256:34fea4f31bf187bc915536831fd0afc9d214755bf700b5cdb1336c82516d154e
 
 # controls the version of taskcluster components installed below
 ARG TC_VERSION="36.0.0"
@@ -122,19 +121,18 @@ COPY scripts/run_gw.py /usr/local/bin/run_gw.py
 COPY scripts/tooltool.py /usr/local/bin/tooltool.py
 
 # touch /root/.android/repositories.cfg to suppress warnings that is
-# it missing during sdkmanager updates.
+# it missing during sdkmanager updates (was in lower block). not
+# needed for now, but keeping it here for reference.
+#
+# RUN mkdir /root/.android && \
+#     touch /root/.android/repositories.cfg
 
 # chmod -R root:root /builds since we have to run this as root at
 # bitbar. Changing ownership prevents user mismatches when caching pip
 # installs.
 
-
-
-# Set noninteractive mode for apt-get and define Android SDK root
-ENV DEBIAN_FRONTEND=noninteractive
 ENV ANDROID_SDK_ROOT=/opt/android-sdk
 ENV PATH=${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools
-
 
 # Create a directory for the Android SDK command line tools
 RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools
@@ -159,9 +157,11 @@ RUN yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --licenses
 # - build-tools (here version 33.0.0 is used as an example)
 RUN ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0"
 
-
-
-
+# fix up perms
+# cleanup cache dirs
+# install nodejs
+# install pips
+# install cloud logging
 RUN cd /tmp && \
     chmod +x /usr/local/bin/generic-worker && \
     chmod +x /usr/local/bin/livelog && \
@@ -171,17 +171,9 @@ RUN cd /tmp && \
     chmod +x /usr/local/bin/entrypoint.* && \
     chmod +x /builds/taskcluster/script.py && \
     chmod 644 /usr/local/src/robustcheckout.py && \
-    # mkdir /root/.android && \
-    # touch /root/.android/repositories.cfg && \
     tar xzf /builds/worker/Downloads/node-v8.11.3-linux-x64.tar.gz -C /usr/local --strip-components 1 && \
     node -v && \
     npm -v && \
-    # previous android-stuff install
-    #
-    # tar xzf /builds/worker/Downloads/android-sdk_r24.3.4-linux.tgz --directory=/builds/worker || true && \
-    # unzip -qq -n /builds/worker/Downloads/sdk-tools-linux-4333796.zip -d /builds/worker/android-sdk-linux/ || true && \
-    # /builds/worker/android-sdk-linux/tools/bin/sdkmanager platform-tools "build-tools;28.0.3" && \
-    #
     # upgrade the builtin setuptools
     pip3 install setuptools -U && \
     # upgrade six, used by mozdevice
