@@ -3,5 +3,4 @@
 set -e
 
 export DOCKER_IMAGE_NAME="devicepool"
-
-LINUX_PLAT="linux/amd64"
+export LINUX_PLAT="linux/amd64"
