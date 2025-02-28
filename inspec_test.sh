@@ -5,10 +5,13 @@
 set -e
 # set -x
 
+. ./vars.sh
+
 name="devicepool-inspec-testing"
 
 docker run \
     --name $name \
+    --platform="$LINUX_PLAT" \
     -u root \
     -e DEVICE_NAME='aje-test' \
     -e TC_WORKER_TYPE='gecko-t-ap-test-g5' \
