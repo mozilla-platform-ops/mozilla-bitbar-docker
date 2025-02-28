@@ -21,7 +21,8 @@ jobs:
             inspec --chef-license=accept
             inspec version
       # use a remote docker, so we can build a docker image
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: edge
         # version: 20.10.14
       # create files required by dockerfile
       - run:
