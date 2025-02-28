@@ -14,7 +14,7 @@ fi
 # if CIRCLE_BRANCH is defined, have a special if block
 if [ -n "$CIRCLE_BRANCH" ]; then
     docker build "$NO_CACHE" -t "$DOCKER_IMAGE_NAME" .
-else; then
+else
     # clean up
     docker-clean
     # build the docker image
