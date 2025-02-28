@@ -12,7 +12,8 @@ if [ "$1" == "--no-cache" ]; then
 fi
 
 # clean up
-docker-clean
+# TODO: only run locally, not on ci
+# docker-clean
 
 # build the docker image
 docker build "$NO_CACHE" --platform="$LINUX_PLAT" -t "$DOCKER_IMAGE_NAME" .
