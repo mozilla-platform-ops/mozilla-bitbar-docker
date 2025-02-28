@@ -1,5 +1,6 @@
 # get sha256 from `docker pull`
-FROM ubuntu:22.04@sha256:34fea4f31bf187bc915536831fd0afc9d214755bf700b5cdb1336c82516d154e
+FROM ubuntu:22.04
+#@sha256:34fea4f31bf187bc915536831fd0afc9d214755bf700b5cdb1336c82516d154e
 
 # controls the version of taskcluster components installed below
 ARG TC_VERSION="36.0.0"
@@ -31,7 +32,9 @@ RUN apt-get update && \
     locales \
     net-tools \
     netcat \
-    openjdk-8-jdk-headless \
+    openjdk-17-jdk-headless \
+    libjaxb-api-java \
+    libjaxb-java \
     python3 \
     python3-pip \
     python3-dev \
@@ -59,14 +62,14 @@ RUN mkdir /builds && \
 WORKDIR /builds/worker
 RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 && \
     mkdir -p \
-        android-sdk-linux \
-        Documents \
-        Downloads \
-        Pictures \
-        Music \
-        Videos \
-        bin \
-        .cache
+    android-sdk-linux \
+    Documents \
+    Downloads \
+    Pictures \
+    Music \
+    Videos \
+    bin \
+    .cache
 
 # Set variables normally configured at login, by the shells parent process, these
 # are taken from GNU su manual
@@ -74,12 +77,12 @@ RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 #   - see https://bugzilla.mozilla.org/show_bug.cgi?id=1600833
 
 ENV    HOME=/builds/worker \
-       SHELL=/bin/bash \
-       LANGUAGE=en_US.UTF-8 \
-       LANG=en_US.UTF-8 \
-       LC_ALL=en_US.UTF-8 \
-       PYTHONIOENCODING=utf-8 \
-       PATH=$PATH:/builds/worker/bin
+    SHELL=/bin/bash \
+    LANGUAGE=en_US.UTF-8 \
+    LANG=en_US.UTF-8 \
+    LC_ALL=en_US.UTF-8 \
+    PYTHONIOENCODING=utf-8 \
+    PATH=$PATH:/builds/worker/bin
 
 # download things
 ADD https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-x64.tar.gz /builds/worker/Downloads
@@ -125,6 +128,40 @@ COPY scripts/tooltool.py /usr/local/bin/tooltool.py
 # bitbar. Changing ownership prevents user mismatches when caching pip
 # installs.
 
+
+
+# Set noninteractive mode for apt-get and define Android SDK root
+ENV DEBIAN_FRONTEND=noninteractive
+ENV ANDROID_SDK_ROOT=/opt/android-sdk
+ENV PATH=${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools
+
+
+# Create a directory for the Android SDK command line tools
+RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools
+
+# Change to a temporary working directory
+WORKDIR /tmp
+
+# Download the latest command line tools for Linux
+RUN wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O commandlinetools.zip && \
+    unzip commandlinetools.zip -d cmdline-tools && \
+    # Move the extracted tools into the proper location
+    mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools/latest && \
+    mv cmdline-tools/cmdline-tools/* ${ANDROID_SDK_ROOT}/cmdline-tools/latest/ && \
+    rm -rf commandlinetools.zip cmdline-tools
+
+# Accept licenses (this is required for sdkmanager)
+RUN yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --licenses
+
+# Install the essential SDK packages:
+# - platform-tools (which includes adb and fastboot)
+# - a specific Android platform (e.g. android-33)
+# - build-tools (here version 33.0.0 is used as an example)
+RUN ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0"
+
+
+
+
 RUN cd /tmp && \
     chmod +x /usr/local/bin/generic-worker && \
     chmod +x /usr/local/bin/livelog && \
@@ -139,9 +176,12 @@ RUN cd /tmp && \
     tar xzf /builds/worker/Downloads/node-v8.11.3-linux-x64.tar.gz -C /usr/local --strip-components 1 && \
     node -v && \
     npm -v && \
-    tar xzf /builds/worker/Downloads/android-sdk_r24.3.4-linux.tgz --directory=/builds/worker || true && \
-    unzip -qq -n /builds/worker/Downloads/sdk-tools-linux-4333796.zip -d /builds/worker/android-sdk-linux/ || true && \
-    /builds/worker/android-sdk-linux/tools/bin/sdkmanager platform-tools "build-tools;28.0.3" && \
+    # previous android-stuff install
+    #
+    # tar xzf /builds/worker/Downloads/android-sdk_r24.3.4-linux.tgz --directory=/builds/worker || true && \
+    # unzip -qq -n /builds/worker/Downloads/sdk-tools-linux-4333796.zip -d /builds/worker/android-sdk-linux/ || true && \
+    # /builds/worker/android-sdk-linux/tools/bin/sdkmanager platform-tools "build-tools;28.0.3" && \
+    #
     # upgrade the builtin setuptools
     pip3 install setuptools -U && \
     # upgrade six, used by mozdevice
