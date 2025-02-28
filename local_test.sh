@@ -5,20 +5,25 @@
 set -e
 # set -x
 
+#
+# runs inspec tests
+#
+
+# source common vars
 . ./vars.sh
 
-name="devicepool-inspec-testing"
+CONTAINER_NAME="devicepool-inspec-testing"
 
 # if we're on CircleCI (CIRCLE_BRANCH is defined), do special stuff
 if [ -n "$CIRCLE_BRANCH" ]; then
-    platform_arg=""
+    PLATFORM_ARG=""
 else
-    platform_arg="--platform=$LINUX_PLAT"
+    PLATFORM_ARG="--platform=$LINUX_PLAT"
 fi
 
 docker run \
-    --name $name \
-    $platform_arg \
+    --name $CONTAINER_NAME \
+    $PLATFORM_ARG \
     -u root \
     -e DEVICE_NAME='aje-test' \
     -e TC_WORKER_TYPE='gecko-t-ap-test-g5' \
@@ -30,8 +35,8 @@ docker run \
     -d -t devicepool
 
 # TODO: run test
-inspec exec image_tests -t docker://$name || true
+inspec exec image_tests -t docker://$CONTAINER_NAME || true
 
 # TODO: tear down
-docker stop $name
-docker rm $name
+docker stop $CONTAINER_NAME
+docker rm $CONTAINER_NAME

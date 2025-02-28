@@ -32,7 +32,7 @@ jobs:
       # build it
       - run: ./local_build.sh
       # test it
-      - run: ./inspec_test.sh
+      - run: ./local_test.sh
 
 workflows:
   main_test:
