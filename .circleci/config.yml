@@ -41,6 +41,8 @@ jobs:
       - run: ./local_build.sh
       # test it
       - run: ./local_test.sh
+      - store_test_results:
+          path: test-results
 
 workflows:
   main_test:

@@ -44,7 +44,7 @@ set +x
 if [ -n "$CIRCLE_BRANCH" ]; then
     set -x
     # output to junit2 format for CircleCI
-    inspec exec image_tests -t docker://$CONTAINER_NAME --reporter cli junit2:.test_output/junit_output
+    inspec exec image_tests -t docker://$CONTAINER_NAME --reporter cli junit2:test-results/results.xml
 else
     set -x
     # if we're running locally ignore the exit code so we can cleanup'
