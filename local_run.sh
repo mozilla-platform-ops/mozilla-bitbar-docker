@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
-set +x
+# set +x
 
 # source common vars
 . ./vars.sh
@@ -20,8 +20,10 @@ fi
 # TODO: mount mozilla source in
 # -v $HOME/hg/mozilla-source:/source
 
+# echo the run command
 set -x
 
+# build the docker image
 docker run --rm -u root \
   -v "$(pwd)":/work \
   --platform="$LINUX_PLAT" \

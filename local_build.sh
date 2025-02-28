@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
-set -x
+# set -x
 
 # source common vars
 . ./vars.sh
@@ -17,6 +17,8 @@ if [ -n "$CIRCLE_BRANCH" ]; then
 else
     # clean up
     docker-clean
+    # echo the build command
+    set +x
     # build the docker image
     docker build $NO_CACHE --platform="$LINUX_PLAT" -t "$DOCKER_IMAGE_NAME" .
 fi
