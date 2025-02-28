@@ -34,9 +34,16 @@ docker run \
     -e TESTDROID_APIKEY="SECRET_SECRET_SECRET_DO NOT LEAK 2" \
     -d -t devicepool
 
-# TODO: run test
-inspec exec image_tests -t docker://$CONTAINER_NAME || true
 
-# TODO: tear down
+# if we're on CircleCI (CIRCLE_BRANCH is defined), do special stuff
+if [ -n "$CIRCLE_BRANCH" ]; then
+    inspec exec image_tests -t docker://$CONTAINER_NAME
+else
+    # if we're running locally ignore the exit code so we can cleanup'
+    # TODO: figure out a more elegant way of handling this
+    inspec exec image_tests -t docker://$CONTAINER_NAME || true
+fi
+
+# tear down
 docker stop $CONTAINER_NAME
 docker rm $CONTAINER_NAME
