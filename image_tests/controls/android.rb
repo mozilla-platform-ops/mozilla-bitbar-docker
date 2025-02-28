@@ -34,6 +34,11 @@ describe bash("PATH=#{path_env} sdkmanager --version") do
   its('stdout') { should match /7.0/ }
 end
 
+# test for profgen
+describe bash("PATH=#{path_env} profgen --help") do
+  its('exit_status') { should eq 0 }
+end
+
 # describe bash("PATH=#{path_env} avdmanager --version") do
 #   its('exit_status') { should eq 0 }
 # end
