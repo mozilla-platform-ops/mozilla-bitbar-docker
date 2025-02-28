@@ -10,13 +10,12 @@ jobs:
       - run: pre-commit run --all-files --verbose
   docker_build:
     docker:
-      - image: cimg/python:3.9.1
+      - image: cimg/ruby:3.4.2
     steps:
       - checkout
       - run:
           name: install inspec
-          command: |
-            curl https://omnitruck.chef.io/install.sh | sudo bash -s -- -P inspec -v 4.18.51
+          command: gem install inspec
       # use a remote docker, so we can build a docker image
       - setup_remote_docker
         # version: 20.10.14
