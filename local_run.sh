@@ -3,9 +3,8 @@
 set -e
 set +x
 
+# source common vars
 . ./vars.sh
-
-# docker run -it --entrypoint '/bin/bash' test-docker
 
 root_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
@@ -22,8 +21,6 @@ fi
 # -v $HOME/hg/mozilla-source:/source
 
 set -x
-
-# docker create --name "$DOCKER_IMAGE_NAME" "$DOCKER_IMAGE_NAME"
 
 docker run --rm -u root \
   -v "$(pwd)":/work \
