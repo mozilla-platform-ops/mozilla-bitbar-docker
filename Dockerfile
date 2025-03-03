@@ -131,7 +131,7 @@ COPY scripts/tooltool.py /usr/local/bin/tooltool.py
 # bitbar. Changing ownership prevents user mismatches when caching pip
 # installs.
 
-ENV ANDROID_SDK_ROOT=/opt/android-sdk
+ENV ANDROID_SDK_ROOT=/builds/worker/android-sdk-linux
 ENV PATH=${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools
 
 # Create a directory for the Android SDK command line tools
@@ -192,5 +192,6 @@ RUN cd /tmp && \
     chown -R root:worker /builds && \
     chmod 775 /builds
 
+WORKDIR /builds/worker
 ENTRYPOINT ["entrypoint.sh"]
 USER worker

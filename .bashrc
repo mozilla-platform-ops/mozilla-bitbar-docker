@@ -10,14 +10,14 @@ if [ -f /etc/profile ]; then
 fi
 
 # old path
-# export ANDROID_HOME=/builds/worker/android-sdk-linux
+export ANDROID_HOME=/builds/worker/android-sdk-linux
 # export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 #
 # jdk 17 and newer androdi tools path
-export ANDROID_HOME=/opt/android-sdk
+# export ANDROID_HOME=/opt/android-sdk
 export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-
-export PATH=${PATH}:/usr/local/bin:${ANDROID_HOME}/platform-tools:${ANDROID_HOME}/platform-tools/bin:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/build-tools/27.0.3
+#
+export PATH=${PATH}:/usr/local/bin:${ANDROID_HOME}/platform-tools:${ANDROID_HOME}/platform-tools/bin:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin
 # Work around broken libcurl3 minidump_stackwalk requirement.
 export LD_LIBRARY_PATH=/builds/worker/LD_LIBRARY
 
