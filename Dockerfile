@@ -141,7 +141,9 @@ RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools
 WORKDIR /tmp
 
 # Download the latest command line tools for Linux
-RUN wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O commandlinetools.zip && \
+#   get latest link from https://developer.android.com/studio#command-line-tools-only
+#   - 3/3/2025: aerickson: updated to 11076708, sha256 is 4d6931209eebb1bfb7c7e8b240a6a3cb3ab24479ea294f3539429574b1eec862
+RUN wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O commandlinetools.zip && \
     unzip commandlinetools.zip -d cmdline-tools && \
     # Move the extracted tools into the proper location
     mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools/latest && \
