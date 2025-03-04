@@ -155,7 +155,7 @@ RUN yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --licenses
 # - platform-tools (which includes adb and fastboot)
 # - a specific Android platform (e.g. android-33)
 # - build-tools (here version 33.0.0 is used as an example)
-RUN ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0"
+RUN ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;35.0.1"
 
 # fix up perms
 # cleanup cache dirs
