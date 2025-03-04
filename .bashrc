@@ -10,11 +10,17 @@ if [ -f /etc/profile ]; then
 fi
 
 export ANDROID_HOME=/builds/worker/android-sdk-linux
+# to handle https://issuetracker.google.com/issues/327026299 issues for now
+#   symptom: `adb devices` issues like:
+#     usb_libusb.cpp:944 failed to register inotify watch on '/dev/bus/usb/006/', falling back to sleep: No such file or directory
+export ADB_LIBUSB=0
+
 # old jdk path
 # export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 # jdk 17 and newer androdi tools path
 export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 # set path to include android tools
+
 export PATH=${PATH}:/usr/local/bin:${ANDROID_HOME}/platform-tools:${ANDROID_HOME}/platform-tools/bin:${ANDROID_HOME}/cmdline-tools/latest/bin
 # Work around broken libcurl3 minidump_stackwalk requirement.
 export LD_LIBRARY_PATH=/builds/worker/LD_LIBRARY

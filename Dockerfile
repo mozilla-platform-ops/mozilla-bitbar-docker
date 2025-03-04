@@ -132,6 +132,11 @@ COPY scripts/tooltool.py /usr/local/bin/tooltool.py
 # installs.
 
 ENV ANDROID_SDK_ROOT=/builds/worker/android-sdk-linux
+# to handle https://issuetracker.google.com/issues/327026299 issues for now
+#   symptom: `adb devices` issues like:
+#     usb_libusb.cpp:944 failed to register inotify watch on '/dev/bus/usb/006/', falling back to sleep: No such file or directory
+ENV ADB_LIBUSB=0
+
 ENV PATH=${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools
 
 # Create a directory for the Android SDK command line tools
