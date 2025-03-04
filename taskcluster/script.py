@@ -192,16 +192,16 @@ def main():
     env['DEVICE_IP'] = scriptvarsenv['DEVICE_IP']
     env['DOCKER_IMAGE_VERSION'] = scriptvarsenv['DOCKER_IMAGE_VERSION']
 
-    # to handle https://issuetracker.google.com/issues/327026299 issues for now
-    #   symptom: `adb devices` issues like:
-    #     usb_libusb.cpp:944 failed to register inotify watch on '/dev/bus/usb/006/', falling back to sleep: No such file or directory
-    env['ADB_LIBUSB'] = '0'
-
     if 'HOME' not in env:
         env['HOME'] = '/builds/worker'
         print('setting HOME to {}'.format(env['HOME']))
 
     show_df()
+
+    # to handle https://issuetracker.google.com/issues/327026299 issues for now
+    #   symptom: `adb devices` issues like:
+    #     usb_libusb.cpp:944 failed to register inotify watch on '/dev/bus/usb/006/', falling back to sleep: No such file or directory
+    os.environ['ADB_LIBUSB'] = '0'
 
     # If we are running normal tests we will be connected via usb and
     # there should be only one device connected.  If we are running
