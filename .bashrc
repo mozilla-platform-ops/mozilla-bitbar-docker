@@ -19,8 +19,8 @@ export ADB_LIBUSB=0
 # export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 # jdk 17 and newer androdi tools path
 export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-# set path to include android tools
 
+# set path to include android tools
 export PATH=${PATH}:/usr/local/bin:${ANDROID_HOME}/platform-tools:${ANDROID_HOME}/platform-tools/bin:${ANDROID_HOME}/cmdline-tools/latest/bin
 # Work around broken libcurl3 minidump_stackwalk requirement.
 export LD_LIBRARY_PATH=/builds/worker/LD_LIBRARY
