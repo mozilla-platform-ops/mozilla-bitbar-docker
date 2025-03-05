@@ -15,13 +15,15 @@ jobs:
       - checkout
       - run:
           name: install inspec
-          # TODO: run from a ruby docker image and `gem install inspec` vs curling the omnitruck script (deb)
+          # TODO: try running from a ruby docker image and `gem install inspec` vs curling the omnitruck script (deb)
           command: |
             curl https://omnitruck.chef.io/install.sh | sudo bash -s -- -P inspec -v 5.22.3
             inspec --chef-license=accept
             inspec version
       # use a remote docker, so we can build a docker image
       - setup_remote_docker
+        # default is 27 currently
+        # TODO: pin this
         # version: edge  # v27
         # version: 20.10.14
       # create files required by dockerfile
