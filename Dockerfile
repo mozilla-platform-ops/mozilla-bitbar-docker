@@ -31,7 +31,9 @@ RUN apt-get update && \
     locales \
     net-tools \
     netcat \
-    openjdk-8-jdk-headless \
+    openjdk-17-jdk-headless \
+    libjaxb-api-java \
+    libjaxb-java \
     python3 \
     python3-pip \
     python3-dev \
@@ -59,14 +61,14 @@ RUN mkdir /builds && \
 WORKDIR /builds/worker
 RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 && \
     mkdir -p \
-        android-sdk-linux \
-        Documents \
-        Downloads \
-        Pictures \
-        Music \
-        Videos \
-        bin \
-        .cache
+    android-sdk-linux \
+    Documents \
+    Downloads \
+    Pictures \
+    Music \
+    Videos \
+    bin \
+    .cache
 
 # Set variables normally configured at login, by the shells parent process, these
 # are taken from GNU su manual
@@ -74,12 +76,12 @@ RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 #   - see https://bugzilla.mozilla.org/show_bug.cgi?id=1600833
 
 ENV    HOME=/builds/worker \
-       SHELL=/bin/bash \
-       LANGUAGE=en_US.UTF-8 \
-       LANG=en_US.UTF-8 \
-       LC_ALL=en_US.UTF-8 \
-       PYTHONIOENCODING=utf-8 \
-       PATH=$PATH:/builds/worker/bin
+    SHELL=/bin/bash \
+    LANGUAGE=en_US.UTF-8 \
+    LANG=en_US.UTF-8 \
+    LC_ALL=en_US.UTF-8 \
+    PYTHONIOENCODING=utf-8 \
+    PATH=$PATH:/builds/worker/bin
 
 # download things
 ADD https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-x64.tar.gz /builds/worker/Downloads
@@ -119,12 +121,54 @@ COPY scripts/run_gw.py /usr/local/bin/run_gw.py
 COPY scripts/tooltool.py /usr/local/bin/tooltool.py
 
 # touch /root/.android/repositories.cfg to suppress warnings that is
-# it missing during sdkmanager updates.
+# it missing during sdkmanager updates (was in lower block). not
+# needed for now, but keeping it here for reference.
+#
+# RUN mkdir /root/.android && \
+#     touch /root/.android/repositories.cfg
 
 # chmod -R root:root /builds since we have to run this as root at
 # bitbar. Changing ownership prevents user mismatches when caching pip
 # installs.
 
+ENV ANDROID_SDK_ROOT=/builds/worker/android-sdk-linux
+# to handle https://issuetracker.google.com/issues/327026299 issues for now
+#   symptom: `adb devices` issues like:
+#     usb_libusb.cpp:944 failed to register inotify watch on '/dev/bus/usb/006/', falling back to sleep: No such file or directory
+ENV ADB_LIBUSB=0
+
+ENV PATH=${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools
+
+# Create a directory for the Android SDK command line tools
+RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools
+
+# Change to a temporary working directory
+WORKDIR /tmp
+
+# Download the latest command line tools for Linux
+#   get latest link from https://developer.android.com/studio#command-line-tools-only
+#   - 3/3/2025: aerickson: updated to 11076708, sha256 is 4d6931209eebb1bfb7c7e8b240a6a3cb3ab24479ea294f3539429574b1eec862
+RUN wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O commandlinetools.zip && \
+    unzip commandlinetools.zip -d cmdline-tools && \
+    # Move the extracted tools into the proper location
+    mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools/latest && \
+    mv cmdline-tools/cmdline-tools/* ${ANDROID_SDK_ROOT}/cmdline-tools/latest/ && \
+    rm -rf commandlinetools.zip cmdline-tools
+
+# Accept licenses (this is required for sdkmanager)
+RUN yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --licenses
+
+# Install the essential SDK packages:
+# - platform-tools (which includes adb and fastboot)
+# - a specific Android platform (e.g. android-33)
+# - build-tools (here version 33.0.0 is used as an example)
+RUN ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;35.0.1"
+
+# fix up perms
+# cleanup cache dirs
+# install nodejs
+# install pips
+# install cloud logging
 RUN cd /tmp && \
     chmod +x /usr/local/bin/generic-worker && \
     chmod +x /usr/local/bin/livelog && \
@@ -134,14 +178,9 @@ RUN cd /tmp && \
     chmod +x /usr/local/bin/entrypoint.* && \
     chmod +x /builds/taskcluster/script.py && \
     chmod 644 /usr/local/src/robustcheckout.py && \
-    mkdir /root/.android && \
-    touch /root/.android/repositories.cfg && \
     tar xzf /builds/worker/Downloads/node-v8.11.3-linux-x64.tar.gz -C /usr/local --strip-components 1 && \
     node -v && \
     npm -v && \
-    tar xzf /builds/worker/Downloads/android-sdk_r24.3.4-linux.tgz --directory=/builds/worker || true && \
-    unzip -qq -n /builds/worker/Downloads/sdk-tools-linux-4333796.zip -d /builds/worker/android-sdk-linux/ || true && \
-    /builds/worker/android-sdk-linux/tools/bin/sdkmanager platform-tools "build-tools;28.0.3" && \
     # upgrade the builtin setuptools
     pip3 install setuptools -U && \
     # upgrade six, used by mozdevice
@@ -160,5 +199,6 @@ RUN cd /tmp && \
     chown -R root:worker /builds && \
     chmod 775 /builds
 
+WORKDIR /builds/worker
 ENTRYPOINT ["entrypoint.sh"]
 USER worker

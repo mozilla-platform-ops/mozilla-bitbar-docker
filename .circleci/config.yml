@@ -3,19 +3,29 @@ version: 2.1
 jobs:
   pre_commit:
     docker:
-      - image: cimg/python:3.9.1
+      - image: cimg/python:3.13.2
     steps:
       - checkout
       - run: pip3 install pre-commit
       - run: pre-commit run --all-files --verbose
   docker_build:
     docker:
-      - image: cimg/python:3.9.1
+      - image: cimg/python:3.13.2
     steps:
       - checkout
+      - run:
+          name: install inspec
+          # TODO: try running from a ruby docker image and `gem install inspec` vs curling the omnitruck script (deb)
+          command: |
+            curl https://omnitruck.chef.io/install.sh | sudo bash -s -- -P inspec -v 5.22.3
+            inspec --chef-license=accept
+            inspec version
       # use a remote docker, so we can build a docker image
-      - setup_remote_docker:
-          version: 20.10.14
+      - setup_remote_docker
+        # default is 27 currently
+        # TODO: pin this
+        # version: edge  # v27
+        # version: 20.10.14
       # create files required by dockerfile
       - run:
           name: create unversioned files required to build
@@ -30,7 +40,11 @@ jobs:
       - run: echo "ci_test_version_DO_NOT_USE" > version
       - run: echo "fake_credential" > stackdriver_credentials.json
       # build it
-      - run: docker build .
+      - run: ./local_build.sh
+      # test it
+      - run: ./local_test.sh
+      - store_test_results:
+          path: test-results
 
 workflows:
   main_test:

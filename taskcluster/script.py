@@ -176,6 +176,15 @@ def main():
 
     env = dict(os.environ)
 
+    # to handle https://issuetracker.google.com/issues/327026299 issues for now
+    #   symptom: `adb devices` issues like:
+    #     usb_libusb.cpp:944 failed to register inotify watch on '/dev/bus/usb/006/', falling back to sleep: No such file or directory
+    #
+    # set for this script (to cover mozdevice calling adb)
+    os.environ['ADB_LIBUSB'] = '0'
+    # set for the script run below that uses `env`
+    env['ADB_LIBUSB'] = '0'
+
     if 'PATH' in os.environ:
         path = os.environ['PATH']
     else:
